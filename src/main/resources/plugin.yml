@@ -1,0 +1,67 @@
+name: MCT
+version: '0.0.1-1.21.4'
+main: me.jitish.mCT.MCT
+api-version: '1.21'
+authors: [ Jitish ]
+commands:
+  die:
+    description: An easy way to kill yourself!
+    usage: /<command>
+
+  god:
+    description: Become Invincible
+    usage: /<command> [all | player | player1 player2 player3...] [on | off]
+
+  feedme:
+    description: fills your food level
+    usage: /<command> [all | player | player1 player2 player3...]
+    aliases:
+      - feed
+
+  healme:
+    description: heals you
+    usage: /<command> [all | player | player1 player2 player3...]
+    aliases:
+      - heal
+
+  setHealth:
+    description: sets your health level to provided number
+    usage: /<command> <health> [all | player | player1 player2 player3...]
+
+  setspawn:
+    description: sets the new spawn point
+
+  spawn:
+    description: this tp you to the spawn location
+
+  nightvision:
+    description: gives you night vision!!
+    usage: /<command> [all | player | player1 player2 player3...] [on | off]
+
+  fly:
+    description: Fly command
+    usage: /fly [all | player | player1 player2 player3...] [on | off]
+
+permissions:
+  MCT.setSpawn:
+    description: permission to use /setSpawn commands
+    default: op
+
+  MCT.godMode:
+    description: permission to use /god commands
+    default: op
+  MCT.godMode.toOtherPlayers:
+    description: Allow to give other player the godMode permission
+    default: op
+    children:
+      MCT.godMode: true
+
+
+  MCT.fly:
+    description: Fly permission
+    default: op
+  MCT.fly.toOtherPlayers:
+    description: Allow to give other player the fly permission
+    default: op
+    children:
+      MCT.fly: true

@@ -1,0 +1,26 @@
+# Gradle build output
+/build/
+/.gradle/
+
+# IntelliJ IDEA
+/.idea/
+/*.iml
+
+# Gradle Wrapper logs
+gradle-app.setting
+
+# OS-related files
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+
+# Logs
+*.log
+
+# Ignore generated gradle folders
+/gradle/
+
+# Other generated files
+out/
