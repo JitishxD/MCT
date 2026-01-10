@@ -3,6 +3,7 @@ package me.jitish.mCT;
 import me.jitish.mCT.commands.*;
 import me.jitish.mCT.listeners.ColorCodesDemo;
 import me.jitish.mCT.listeners.SpawnEvents;
+import me.jitish.mCT.listeners.PingDisplayListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MCT extends JavaPlugin {
@@ -23,10 +24,14 @@ public final class MCT extends JavaPlugin {
         getConfig().options().copyDefaults(); // todo this line of code is suspicious
         saveDefaultConfig();
 
+        PingDisplayListener pingDisplayListener = new PingDisplayListener();
+        Ping pingCommand = new Ping(pingDisplayListener);
+
         // Plugin startup logic
         getServer().getPluginManager().registerEvents(new Die(), this);
         getServer().getPluginManager().registerEvents(new ColorCodesDemo(), this);
         getServer().getPluginManager().registerEvents(new SpawnEvents(this), this);
+        getServer().getPluginManager().registerEvents(pingDisplayListener, this);
 
 
         //All commands are as follows
@@ -39,6 +44,7 @@ public final class MCT extends JavaPlugin {
         getCommand("spawn").setExecutor(new Spawn(this));
         getCommand("fly").setExecutor(new Fly());
         getCommand("nightVision").setExecutor(new NightVision());
+        getCommand("ping").setExecutor(pingCommand);
 
         //Tab completer for some commands
         getCommand("FeedMe").setTabCompleter(new FeedMe());
@@ -47,6 +53,7 @@ public final class MCT extends JavaPlugin {
         getCommand("setHealth").setTabCompleter(new SetHealth());
         getCommand("fly").setTabCompleter(new Fly());
         getCommand("god").setTabCompleter(new God());
+        getCommand("ping").setTabCompleter(pingCommand);
     }
 
     @Override

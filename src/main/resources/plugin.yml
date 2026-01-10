@@ -1,5 +1,5 @@
 name: MCT
-version: '0.0.2-1.21.10'
+version: '0.0.3-1.21.11'
 main: me.jitish.mCT.MCT
 api-version: '1.21'
 authors: [ Jitish ]
@@ -42,6 +42,12 @@ commands:
     description: Fly command
     usage: /fly [all | player | player1 player2 player3...] [on | off]
 
+  ping:
+    description: Toggle your ping display (action bar)
+    usage: /ping [on|off]
+    aliases:
+      - latency
+
 permissions:
   MCT.setSpawn:
     description: permission to use /setSpawn commands
@@ -65,3 +71,8 @@ permissions:
     default: op
     children:
       MCT.fly: true
+
+  MCT.ping:
+    description: permission to use /ping command
+    default: true
+
