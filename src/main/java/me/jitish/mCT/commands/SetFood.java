@@ -13,26 +13,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SetHealth implements CommandExecutor, TabCompleter {
+public class SetFood implements CommandExecutor, TabCompleter {
 
-    private static final double MIN_HEALTH = 0;
-    private static final double MAX_HEALTH = 20;
+    private static final int MIN_FOOD = 0;
+    private static final int MAX_FOOD = 20;
 
-    private static boolean isValidHealth(double health) {
-        return health >= MIN_HEALTH && health <= MAX_HEALTH;
+    private static boolean isValidFoodLevel(int foodLevel) {
+        return foodLevel >= MIN_FOOD && foodLevel <= MAX_FOOD;
     }
 
-    private static Double parseHealth(String input) {
+    private static Integer parseFoodLevel(String input) {
         try {
-            return Double.parseDouble(input);
+            return Integer.parseInt(input);
         } catch (NumberFormatException e) {
             return null;
         }
     }
 
-    private void applyHealth(Player target, double health) {
-        target.setHealth(health);
-        target.sendMessage(ChatColor.GREEN + "Your health has been set to " + health);
+    private void applyFood(Player target, int foodLevel) {
+        target.setFoodLevel(foodLevel);
+        target.sendMessage(ChatColor.GREEN + "Your food level has been set to " + foodLevel);
     }
 
     @Override
@@ -42,37 +42,37 @@ public class SetHealth implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!executor.hasPermission("MCT.setHealth")) {
+        if (!executor.hasPermission("MCT.setFood")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));
             return true;
         }
 
         if (args.length == 0 || args.length > 2) {
-            executor.sendMessage(ChatColor.RED + "Usage: /sethealth <0-20> | /sethealth <player|all> <0-20>");
+            executor.sendMessage(ChatColor.RED + "Usage: /setfood <0-20> | /setfood <player|all> <0-20>");
             return true;
         }
 
         if (args.length == 1) {
-            Double health = parseHealth(args[0]);
-            if (health == null) {
+            Integer foodLevel = parseFoodLevel(args[0]);
+            if (foodLevel == null) {
                 executor.sendMessage(ChatColor.RED + "Please enter a valid number!");
                 return true;
             }
-            if (!isValidHealth(health)) {
+            if (!isValidFoodLevel(foodLevel)) {
                 executor.sendMessage(ChatColor.RED + "Please enter a valid number between 0 and 20!");
                 return true;
             }
-            applyHealth(executor, health);
+            applyFood(executor, foodLevel);
             return true;
         }
 
         String targetArg = args[0];
-        Double health = parseHealth(args[1]);
-        if (health == null) {
+        Integer foodLevel = parseFoodLevel(args[1]);
+        if (foodLevel == null) {
             executor.sendMessage(ChatColor.RED + "Please enter a valid number!");
             return true;
         }
-        if (!isValidHealth(health)) {
+        if (!isValidFoodLevel(foodLevel)) {
             executor.sendMessage(ChatColor.RED + "Please enter a valid number between 0 and 20!");
             return true;
         }
@@ -80,16 +80,16 @@ public class SetHealth implements CommandExecutor, TabCompleter {
         boolean targetingOthers = targetArg.equalsIgnoreCase("all")
                 || !targetArg.equalsIgnoreCase(executor.getName());
 
-        if (targetingOthers && !executor.hasPermission("MCT.setHealth.toOtherPlayers")) {
-            executor.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to set health for other players."));
+        if (targetingOthers && !executor.hasPermission("MCT.setFood.toOtherPlayers")) {
+            executor.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to set food level for other players."));
             return true;
         }
 
         if (targetArg.equalsIgnoreCase("all")) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                applyHealth(player, health);
+                applyFood(player, foodLevel);
             }
-            executor.sendMessage(ChatColor.GREEN + "You set health to " + health + " for all players on the server!");
+            executor.sendMessage(ChatColor.GREEN + "You set food level to " + foodLevel + " for all players on the server!");
             return true;
         }
 
@@ -99,9 +99,9 @@ public class SetHealth implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        applyHealth(target, health);
+        applyFood(target, foodLevel);
         if (!target.equals(executor)) {
-            executor.sendMessage(ChatColor.GREEN + "You set health to " + health + " for " + target.getName());
+            executor.sendMessage(ChatColor.GREEN + "You set food level to " + foodLevel + " for " + target.getName());
         }
         return true;
     }
@@ -112,7 +112,7 @@ public class SetHealth implements CommandExecutor, TabCompleter {
             return Collections.emptyList();
         }
 
-        if (args.length != 1 || !sender.hasPermission("MCT.setHealth.toOtherPlayers")) {
+        if (args.length != 1 || !sender.hasPermission("MCT.setFood.toOtherPlayers")) {
             return Collections.emptyList();
         }
 

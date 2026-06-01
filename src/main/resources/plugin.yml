@@ -26,7 +26,7 @@ commands:
 
   setHealth:
     description: sets your health level to provided number
-    usage: /<command> <health> [all | player | player1 player2 player3...]
+    usage: /<command> <0-20> | /<command> <player|all> <0-20>
 
   setspawn:
     description: sets the new spawn point
@@ -48,6 +48,22 @@ commands:
     aliases:
       - latency
 
+  repair:
+    description: Repair item in hand or all items in inventory
+    usage: /repair | /repair all | /repair <player|all> [all]
+    aliases:
+      - fix
+
+  afk:
+    description: Toggle AFK mode with a holographic display above your head
+    usage: /afk
+
+  setFood:
+    description: sets your food level to provided number
+    usage: /<command> <0-20> | /<command> <player|all> <0-20>
+    aliases:
+      - setfoodlevel
+
 permissions:
   MCT.setSpawn:
     description: permission to use /setSpawn commands
@@ -65,7 +81,7 @@ permissions:
 
   MCT.fly:
     description: Fly permission
-    default: op
+    default: true
   MCT.fly.toOtherPlayers:
     description: Allow to give other player the fly permission
     default: op
@@ -76,3 +92,38 @@ permissions:
     description: permission to use /ping command
     default: true
 
+  MCT.repair:
+    description: permission to use /repair command (hand item)
+    default: op
+  MCT.repair.all:
+    description: permission to use /repair all (entire inventory)
+    default: op
+    children:
+      MCT.repair: true
+  MCT.repair.toOtherPlayers:
+    description: Allow repairing other players
+    default: op
+    children:
+      MCT.repair: true
+
+  MCT.afk:
+    description: permission to use /afk command
+    default: true
+
+  MCT.setHealth:
+    description: permission to use /setHealth command
+    default: op
+  MCT.setHealth.toOtherPlayers:
+    description: Allow to set health for other players
+    default: op
+    children:
+      MCT.setHealth: true
+
+  MCT.setFood:
+    description: permission to use /setFood command
+    default: op
+  MCT.setFood.toOtherPlayers:
+    description: Allow to set food level for other players
+    default: op
+    children:
+      MCT.setFood: true

@@ -1,0 +1,4 @@
+# AFK timeout in seconds. Players idle for this long will be auto-marked AFK.
+# Set to -1 to disable auto-AFK (manual /afk only).
+# Default: 300 (5 minutes)
+afk-timeout-seconds: 300

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.4--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-0.0.5--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -39,6 +39,9 @@
 | 🌙 **Night Vision** | Toggle permanent night vision effect | Self, Others, All |
 | 🕊️ **Fly Mode** | Toggle creative-style flight in survival | Self, Others, All |
 | 📡 **Ping Display** | Live ping shown on the action bar | Self |
+| 💤 **AFK System** | Hologram AFK indicator with auto-idle detection | Self, Automatic |
+| 🔧 **Repair Items** | Instantly repair hand item or entire inventory | Self |
+| 🍗 **Set Food** | Set food level to a specific value (0–20) | Self, Others, All |
 | 🎨 **Welcome Messages** | Styled join messages with time-since-last-visit | Automatic |
 | ⚰️ **Respawn at Spawn** | Players respawn at the custom spawn point | Automatic |
 | 🆕 **First-Join Teleport** | New players spawn at the custom spawn point | Automatic |
@@ -53,12 +56,15 @@
 | `/god` | — | Toggle god mode (invulnerability) | `/god [all \| player...] [on \| off]` |
 | `/feedme` | `/feed` | Restore food level to max | `/feedme [all \| player...]` |
 | `/healme` | `/heal` | Restore health to max | `/healme [all \| player...]` |
-| `/setHealth` | — | Set health to a specific value | `/setHealth <0-20> [all \| player...]` |
+| `/setHealth` | — | Set health to a specific value | `/setHealth <0-20>` or `/setHealth <player\|all> <0-20>` |
 | `/setspawn` | — | Set the server spawn point | `/setspawn` |
 | `/spawn` | — | Teleport to the spawn point | `/spawn` |
 | `/nightvision` | — | Toggle night vision | `/nightvision [all \| player...] [on \| off]` |
 | `/fly` | — | Toggle flight mode | `/fly [all \| player...] [on \| off]` |
 | `/ping` | `/latency` | Toggle live ping display on action bar | `/ping [on \| off]` |
+| `/afk` | — | Toggle AFK mode with a holographic display | `/afk` |
+| `/setFood` | `/setfoodlevel`| Set food level to a specific value | `/setFood <0-20>` or `/setFood <player\|all> <0-20>` |
+| `/repair` | `/fix` | Repair item in hand or all items | `/repair [all]` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
 
@@ -74,6 +80,13 @@
 | `MCT.fly` | Use `/fly` on yourself | OP | — |
 | `MCT.fly.toOtherPlayers` | Use `/fly` on other players & all | OP | `MCT.fly` |
 | `MCT.ping` | Use `/ping` command | Everyone | — |
+| `MCT.setHealth` | Use `/setHealth` on yourself | OP | — |
+| `MCT.setHealth.toOtherPlayers` | Use `/setHealth` on other players & all | OP | `MCT.setHealth` |
+| `MCT.setFood` | Use `/setFood` on yourself | OP | — |
+| `MCT.setFood.toOtherPlayers` | Use `/setFood` on other players & all | OP | `MCT.setFood` |
+| `MCT.afk` | Use `/afk` command | Everyone | — |
+| `MCT.repair` | Use `/repair` command | OP | — |
+| `MCT.repair.all` | Use `/repair all` command | OP | `MCT.repair` |
 
 > **Note:** Parent permissions automatically inherit their children. For example, granting `MCT.godMode.toOtherPlayers` also grants `MCT.godMode`.
 
@@ -88,6 +101,7 @@
 | **Player Respawn** | Respawns players at the custom spawn point (if set) | [SpawnEvents.java#L33](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/SpawnEvents.java#L33) |
 | **Player Join (Ping)** | Auto-enables ping display on the action bar for eligible players | [PingDisplayListener.java#L29](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L29) |
 | **Player Quit** | Automatically cleans up ping display tasks | [PingDisplayListener.java#L35](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L35) |
+| **Activity Tracking** | Monitors chats, moves, interactions to reset AFK timeout | [AfkListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/AfkListener.java) |
 
 
 ---
@@ -129,6 +143,7 @@ MCT/
 │   ├── java/me/jitish/mCT/
 │   │   ├── MCT.java                          # Main plugin class
 │   │   ├── commands/
+│   │   │   ├── Afk.java                      # /afk command
 │   │   │   ├── Die.java                      # /die command + death event
 │   │   │   ├── FeedMe.java                   # /feedme command
 │   │   │   ├── Fly.java                      # /fly command
@@ -136,10 +151,13 @@ MCT/
 │   │   │   ├── HealMe.java                   # /healme command
 │   │   │   ├── NightVision.java              # /nightvision command
 │   │   │   ├── Ping.java                     # /ping command
+│   │   │   ├── Repair.java                   # /repair command
+│   │   │   ├── SetFood.java                  # /setFood command
 │   │   │   ├── SetHealth.java                # /setHealth command
 │   │   │   ├── SetSpawn.java                 # /setspawn command
 │   │   │   └── Spawn.java                    # /spawn command
 │   │   └── listeners/
+│   │       ├── AfkListener.java              # AFK idle tracking
 │   │       ├── ColorCodesDemo.java           # Join message formatting
 │   │       ├── PingDisplayListener.java      # Action bar ping display
 │   │       └── SpawnEvents.java              # Spawn/respawn handling
@@ -178,6 +196,7 @@ MCT/
 
 | Version | MC Version | Highlights |
 |:--------|:-----------|:-----------|
+| `0.0.5-26.1.2` | 26.1.2 | SetFood cleanup, AFK and repair commands |
 | `0.0.4-26.1.2` | 26.1.2 | Updated to Minecraft 26.1.2, Gradle 9.5.1 |
 | `0.0.3-1.21.11` | 1.21.x | Added ping display, fly, god mode |
 
