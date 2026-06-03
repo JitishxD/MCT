@@ -36,6 +36,9 @@ public final class MCT extends JavaPlugin {
         Fly flyCommand = new Fly();
         NightVision nightVisionCommand = new NightVision();
         Repair repairCommand = new Repair();
+        Enchantt enchanttCommand = new Enchantt();
+        Denchant denchantCommand = new Denchant();
+        Summonn summonCommand = new Summonn();
 
         PingDisplayListener pingDisplayListener = new PingDisplayListener();
         Ping pingCommand = new Ping(pingDisplayListener);
@@ -67,6 +70,9 @@ public final class MCT extends JavaPlugin {
         getCommand("ping").setExecutor(pingCommand);
         getCommand("repair").setExecutor(repairCommand);
         getCommand("afk").setExecutor(afkCommand);
+        getCommand("enchantt").setExecutor(enchanttCommand);
+        getCommand("denchant").setExecutor(denchantCommand);
+        getCommand("summonn").setExecutor(summonCommand);
 
         // Register tab completers (same instances — they implement both interfaces)
         getCommand("god").setTabCompleter(godCommand);
@@ -79,6 +85,9 @@ public final class MCT extends JavaPlugin {
         getCommand("repair").setTabCompleter(repairCommand);
         getCommand("afk").setTabCompleter(afkCommand);
         getCommand("setFood").setTabCompleter(setFoodCommand);
+        getCommand("enchantt").setTabCompleter(enchanttCommand);
+        getCommand("denchant").setTabCompleter(denchantCommand);
+        getCommand("summonn").setTabCompleter(summonCommand);
 
         // Start the AFK idle-checker scheduler
         afkListener.startIdleChecker();

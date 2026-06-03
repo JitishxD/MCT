@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.5--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-0.0.6--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -42,6 +42,9 @@
 | 💤 **AFK System** | Hologram AFK indicator with auto-idle detection | Self, Automatic |
 | 🔧 **Repair Items** | Instantly repair hand item or entire inventory | Self |
 | 🍗 **Set Food** | Set food level to a specific value (0–20) | Self, Others, All |
+| ✨ **Super Enchant** | Apply any enchantment up to level 255 | Self, Others, All |
+| 🚫 **Disenchant** | Remove enchantments from items or entire inventory | Self, Others, All |
+| 👾 **Mass Summon** | Summon multiple entities at once (up to 500) | Self, Others |
 | 🎨 **Welcome Messages** | Styled join messages with time-since-last-visit | Automatic |
 | ⚰️ **Respawn at Spawn** | Players respawn at the custom spawn point | Automatic |
 | 🆕 **First-Join Teleport** | New players spawn at the custom spawn point | Automatic |
@@ -65,8 +68,13 @@
 | `/afk` | — | Toggle AFK mode with a holographic display | `/afk` |
 | `/setFood` | `/setfoodlevel`| Set food level to a specific value | `/setFood <0-20>` or `/setFood <player\|all> <0-20>` |
 | `/repair` | `/fix` | Repair item in hand or all items | `/repair [all]` |
+| `/enchantt` | — | Enchant held item up to level 255 | `/enchantt <player\|all> <enchantment> <level>` |
+| `/denchant` | — | Remove enchantments from items | `/denchant <player\|all> [enchantment \| all]` |
+| `/summonn` | — | Summon multiple entities at once | `/summonn <entity> [amount] [player \| x y z]` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
+> **Note:** `/summonn` supports custom entity variants. Try aliases like `charged_creeper`, `baby_zombie`, `black_cat`, `temperate_frog`, `pale_wolf`, `warm_chicken`, `red_mooshroom`.
+> **Combo aliases:** `chicken_jockey`, `husk_jockey`, `drowned_jockey`, `zombie_villager_jockey`, `spider_jockey`, `cave_spider_jockey`, `skeleton_horse_trap`, `pillager_ravager`, `evoker_ravager`, `vindicator_ravager`, `strider_jockey`, `baby_piglin_hoglin`.
 
 ---
 
@@ -87,6 +95,13 @@
 | `MCT.afk` | Use `/afk` command | Everyone | — |
 | `MCT.repair` | Use `/repair` command | OP | — |
 | `MCT.repair.all` | Use `/repair all` command | OP | `MCT.repair` |
+| `MCT.enchantt` | Use `/enchantt` on yourself | OP | — |
+| `MCT.enchantt.toOtherPlayers` | Enchant other players' held items | OP | `MCT.enchantt` |
+| `MCT.denchant` | Use `/denchant` on yourself | OP | — |
+| `MCT.denchant.all` | Disenchant entire inventory | OP | `MCT.denchant` |
+| `MCT.denchant.toOtherPlayers` | Disenchant other players' items | OP | `MCT.denchant` |
+| `MCT.summonn` | Use `/summonn` command | OP | — |
+| `MCT.summonn.toOtherPlayers` | Summon entities at other players' locations | OP | `MCT.summonn` |
 
 > **Note:** Parent permissions automatically inherit their children. For example, granting `MCT.godMode.toOtherPlayers` also grants `MCT.godMode`.
 
@@ -152,6 +167,9 @@ MCT/
 │   │   │   ├── NightVision.java              # /nightvision command
 │   │   │   ├── Ping.java                     # /ping command
 │   │   │   ├── Repair.java                   # /repair command
+│   │   │   ├── Enchantt.java                  # /enchantt command
+│   │   │   ├── Denchant.java                  # /denchant command
+│   │   │   ├── Summonn.java                   # /summonn command
 │   │   │   ├── SetFood.java                  # /setFood command
 │   │   │   ├── SetHealth.java                # /setHealth command
 │   │   │   ├── SetSpawn.java                 # /setspawn command
@@ -196,6 +214,7 @@ MCT/
 
 | Version | MC Version | Highlights |
 |:--------|:-----------|:-----------|
+| `0.0.6-26.1.2` | 26.1.2 | Enchant (up to 255), Disenchant, and Mass Summon commands |
 | `0.0.5-26.1.2` | 26.1.2 | SetFood cleanup, AFK and repair commands |
 | `0.0.4-26.1.2` | 26.1.2 | Updated to Minecraft 26.1.2, Gradle 9.5.1 |
 | `0.0.3-1.21.11` | 1.21.x | Added ping display, fly, god mode |

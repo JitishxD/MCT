@@ -64,6 +64,18 @@ commands:
     aliases:
       - setfoodlevel
 
+  enchantt:
+    description: Enchant any item up to level 255 (bypasses vanilla limits)
+    usage: /enchantt <player|all> <enchantment> <level>
+
+  denchant:
+    description: Remove enchantments from held item or entire inventory
+    usage: /denchant <player|all> [enchantment | all]
+
+  summonn:
+    description: Summon multiple entities at once (up to 500)
+    usage: /summonn <entity> [amount] [player | x y z]
+
 permissions:
   MCT.setSpawn:
     description: permission to use /setSpawn commands
@@ -127,3 +139,35 @@ permissions:
     default: op
     children:
       MCT.setFood: true
+
+  MCT.enchantt:
+    description: permission to use /enchantt command
+    default: op
+  MCT.enchantt.toOtherPlayers:
+    description: Allow enchanting other players' held items
+    default: op
+    children:
+      MCT.enchantt: true
+
+  MCT.denchant:
+    description: permission to use /denchant command
+    default: op
+  MCT.denchant.all:
+    description: permission to disenchant entire inventory
+    default: op
+    children:
+      MCT.denchant: true
+  MCT.denchant.toOtherPlayers:
+    description: Allow disenchanting other players' items
+    default: op
+    children:
+      MCT.denchant: true
+
+  MCT.summonn:
+    description: permission to use /summonn command
+    default: op
+  MCT.summonn.toOtherPlayers:
+    description: Allow summoning entities at other players' locations
+    default: op
+    children:
+      MCT.summonn: true
