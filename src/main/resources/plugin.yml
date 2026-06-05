@@ -76,6 +76,20 @@ commands:
     description: Summon multiple entities at once (up to 500)
     usage: /summonn <entity> [amount] [player | x y z]
 
+  pwarp:
+    description: Create and use player warps
+    usage: /pwarp <name|set|remove|list|info>
+    aliases:
+      - pw
+      - playerwarps
+
+  swarp:
+    description: Create and use server warps
+    usage: /swarp <name|set|remove|list|info>
+    aliases:
+      - serverwarp
+      - serverwarps
+
 permissions:
   MCT.setSpawn:
     description: permission to use /setSpawn commands
@@ -171,3 +185,31 @@ permissions:
     default: op
     children:
       MCT.summonn: true
+
+  MCT.pwarp:
+    description: Use player warps
+    default: true
+  MCT.pwarp.create:
+    description: Create player warps
+    default: true
+    children:
+      MCT.pwarp: true
+  MCT.pwarp.remove:
+    description: Remove owned player warps
+    default: true
+    children:
+      MCT.pwarp: true
+  MCT.pwarp.admin:
+    description: Remove any player warp
+    default: op
+    children:
+      MCT.pwarp.remove: true
+
+  MCT.swarp:
+    description: Use server warps
+    default: true
+  MCT.swarp.admin:
+    description: Create and remove server warps
+    default: op
+    children:
+      MCT.swarp: true

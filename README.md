@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.6--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-0.0.7--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -45,6 +45,8 @@
 | ✨ **Super Enchant** | Apply any enchantment up to level 255 | Self, Others, All |
 | 🚫 **Disenchant** | Remove enchantments from items or entire inventory | Self, Others, All |
 | 👾 **Mass Summon** | Summon multiple entities at once (up to 500) | Self, Others |
+| 🧭 **Player Warps** | Players can create named warps and teleport to them | Self |
+| 🗺️ **Server Warps** | Admin-managed global warps for all players | Server-wide |
 | 🎨 **Welcome Messages** | Styled join messages with time-since-last-visit | Automatic |
 | ⚰️ **Respawn at Spawn** | Players respawn at the custom spawn point | Automatic |
 | 🆕 **First-Join Teleport** | New players spawn at the custom spawn point | Automatic |
@@ -71,8 +73,11 @@
 | `/enchantt` | — | Enchant held item up to level 255 | `/enchantt <player\|all> <enchantment> <level>` |
 | `/denchant` | — | Remove enchantments from items | `/denchant <player\|all> [enchantment \| all]` |
 | `/summonn` | — | Summon multiple entities at once | `/summonn <entity> [amount] [player \| x y z]` |
+| `/pwarp` | `/pw`, `/playerwarps` | Create, list, inspect, remove, and use player warps | `/pwarp <name>` or `/pwarp set <name>` |
+| `/swarp` | `/serverwarp`, `/serverwarps` | Use admin-managed server warps | `/swarp <name>` or `/swarp set <name>` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
+> **Storage:** player warps are saved in `config.yml` under `player-warps.warps`; server warps are saved under `server-warps.warps`.
 > **Note:** `/summonn` supports custom entity variants. Try aliases like `charged_creeper`, `baby_zombie`, `black_cat`, `temperate_frog`, `pale_wolf`, `warm_chicken`, `red_mooshroom`.
 > **Combo aliases:** `chicken_jockey`, `husk_jockey`, `drowned_jockey`, `zombie_villager_jockey`, `spider_jockey`, `cave_spider_jockey`, `skeleton_horse_trap`, `pillager_ravager`, `evoker_ravager`, `vindicator_ravager`, `strider_jockey`, `baby_piglin_hoglin`.
 
@@ -102,6 +107,12 @@
 | `MCT.denchant.toOtherPlayers` | Disenchant other players' items | OP | `MCT.denchant` |
 | `MCT.summonn` | Use `/summonn` command | OP | — |
 | `MCT.summonn.toOtherPlayers` | Summon entities at other players' locations | OP | `MCT.summonn` |
+| `MCT.pwarp` | Use `/pwarp` and teleport to player warps | Everyone | — |
+| `MCT.pwarp.create` | Create player warps | Everyone | `MCT.pwarp` |
+| `MCT.pwarp.remove` | Remove owned player warps | Everyone | `MCT.pwarp` |
+| `MCT.pwarp.admin` | Remove any player warp | OP | `MCT.pwarp.remove` |
+| `MCT.swarp` | Use `/swarp` and teleport to server warps | Everyone | — |
+| `MCT.swarp.admin` | Create and remove server warps | OP | `MCT.swarp` |
 
 > **Note:** Parent permissions automatically inherit their children. For example, granting `MCT.godMode.toOtherPlayers` also grants `MCT.godMode`.
 
@@ -170,15 +181,19 @@ MCT/
 │   │   │   ├── Enchantt.java                  # /enchantt command
 │   │   │   ├── Denchant.java                  # /denchant command
 │   │   │   ├── Summonn.java                   # /summonn command
+│   │   │   ├── WarpCommand.java                # /pwarp and /swarp command handler
 │   │   │   ├── SetFood.java                  # /setFood command
 │   │   │   ├── SetHealth.java                # /setHealth command
 │   │   │   ├── SetSpawn.java                 # /setspawn command
 │   │   │   └── Spawn.java                    # /spawn command
-│   │   └── listeners/
-│   │       ├── AfkListener.java              # AFK idle tracking
-│   │       ├── ColorCodesDemo.java           # Join message formatting
-│   │       ├── PingDisplayListener.java      # Action bar ping display
-│   │       └── SpawnEvents.java              # Spawn/respawn handling
+│   │   ├── listeners/
+│   │   │   ├── AfkListener.java              # AFK idle tracking
+│   │   │   ├── ColorCodesDemo.java           # Join message formatting
+│   │   │   ├── PingDisplayListener.java      # Action bar ping display
+│   │   │   └── SpawnEvents.java              # Spawn/respawn handling
+│   │   └── warps/
+│   │       ├── WarpPoint.java                # Warp data
+│   │       └── WarpStore.java                # Warp storage
 │   └── resources/
 │       ├── plugin.yml                        # Plugin descriptor
 │       └── config.yml                        # Configuration file
@@ -214,6 +229,7 @@ MCT/
 
 | Version | MC Version | Highlights |
 |:--------|:-----------|:-----------|
+| `0.0.7-26.1.2` | 26.1.2 | Added dependency-free player warps and admin-managed server warps |
 | `0.0.6-26.1.2` | 26.1.2 | Enchant (up to 255), Disenchant, and Mass Summon commands |
 | `0.0.5-26.1.2` | 26.1.2 | SetFood cleanup, AFK and repair commands |
 | `0.0.4-26.1.2` | 26.1.2 | Updated to Minecraft 26.1.2, Gradle 9.5.1 |

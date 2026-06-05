@@ -5,12 +5,15 @@ import me.jitish.mCT.listeners.AfkListener;
 import me.jitish.mCT.listeners.ColorCodesDemo;
 import me.jitish.mCT.listeners.SpawnEvents;
 import me.jitish.mCT.listeners.PingDisplayListener;
+import me.jitish.mCT.warps.WarpStore;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MCT extends JavaPlugin {
 
     private static MCT pluginInstanceVarWithMethod1;
     private AfkListener afkListener;
+    private WarpStore playerWarpStore;
+    private WarpStore serverWarpStore;
 
     //Getter for pluginInstanceVarWithMethod1
     public static MCT getPluginInstanceVar() {
@@ -48,6 +51,38 @@ public final class MCT extends JavaPlugin {
 
         SetSpawn setSpawnCommand = new SetSpawn(this);
         Spawn spawnCommand = new Spawn(this);
+        playerWarpStore = new WarpStore(this, "player-warps.warps", "player warp");
+        serverWarpStore = new WarpStore(this, "server-warps.warps", "server warp");
+        WarpCommand playerWarpsCommand = new WarpCommand(playerWarpStore, new WarpCommand.Settings(
+                "pwarp",
+                "Player warps",
+                "Player Warp",
+                "player warp",
+                "player warps",
+                "Owner",
+                "MCT.pwarp",
+                "MCT.pwarp.create",
+                "MCT.pwarp.remove",
+                "MCT.pwarp.admin",
+                true,
+                true,
+                8
+        ));
+        WarpCommand serverWarpsCommand = new WarpCommand(serverWarpStore, new WarpCommand.Settings(
+                "swarp",
+                "Server warps",
+                "Server Warp",
+                "server warp",
+                "server warps",
+                "Created by",
+                "MCT.swarp",
+                "MCT.swarp.admin",
+                "MCT.swarp.admin",
+                "MCT.swarp.admin",
+                false,
+                false,
+                8
+        ));
 
         // Register event listeners
         getServer().getPluginManager().registerEvents(dieCommand, this);
@@ -73,6 +108,8 @@ public final class MCT extends JavaPlugin {
         getCommand("enchantt").setExecutor(enchanttCommand);
         getCommand("denchant").setExecutor(denchantCommand);
         getCommand("summonn").setExecutor(summonCommand);
+        getCommand("pwarp").setExecutor(playerWarpsCommand);
+        getCommand("swarp").setExecutor(serverWarpsCommand);
 
         // Register tab completers (same instances — they implement both interfaces)
         getCommand("god").setTabCompleter(godCommand);
@@ -88,6 +125,8 @@ public final class MCT extends JavaPlugin {
         getCommand("enchantt").setTabCompleter(enchanttCommand);
         getCommand("denchant").setTabCompleter(denchantCommand);
         getCommand("summonn").setTabCompleter(summonCommand);
+        getCommand("pwarp").setTabCompleter(playerWarpsCommand);
+        getCommand("swarp").setTabCompleter(serverWarpsCommand);
 
         // Start the AFK idle-checker scheduler
         afkListener.startIdleChecker();
@@ -98,6 +137,12 @@ public final class MCT extends JavaPlugin {
         // Plugin shutdown logic
         if (afkListener != null) {
             afkListener.stopIdleChecker();
+        }
+        if (playerWarpStore != null) {
+            playerWarpStore.save();
+        }
+        if (serverWarpStore != null) {
+            serverWarpStore.save();
         }
     }
 }

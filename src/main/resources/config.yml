@@ -2,3 +2,11 @@
 # Set to -1 to disable auto-AFK (manual /afk only).
 # Default: 300 (5 minutes)
 afk-timeout-seconds: 300
+
+# Player warps are saved here automatically by /pwarp.
+player-warps:
+  warps: {}
+
+# Server warps are admin-managed global warps saved by /swarp.
+server-warps:
+  warps: {}
