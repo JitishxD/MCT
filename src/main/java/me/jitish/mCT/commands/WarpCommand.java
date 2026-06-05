@@ -45,11 +45,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
         String subCommand = args[0].toLowerCase();
         switch (subCommand) {
-            case "set":
             case "create":
                 createWarp(sender, label, args);
                 return true;
-            case "remove":
             case "delete":
                 removeWarp(sender, label, args);
                 return true;
@@ -58,6 +56,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 return true;
             case "info":
                 sendWarpInfo(sender, label, args);
+                return true;
+            case "go":
+                teleportUsingGo(sender, label, args);
                 return true;
             default:
                 teleportToWarp(sender, args[0]);
@@ -78,7 +79,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length != 2) {
-            player.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " set <name>");
+            player.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " create <name>");
             return;
         }
 
@@ -105,7 +106,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length != 2) {
-            sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " remove <name>");
+            sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " delete <name>");
             return;
         }
 
@@ -220,6 +221,15 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ChatColor.GRAY + "Visits: " + ChatColor.WHITE + warp.getVisits());
     }
 
+    private void teleportUsingGo(CommandSender sender, String label, String[] args) {
+        if (args.length != 2) {
+            sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " go <name>");
+            return;
+        }
+
+        teleportToWarp(sender, args[1]);
+    }
+
     private void teleportToWarp(CommandSender sender, String warpName) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Only players can teleport to " + settings.warpLabelPlural + ".");
@@ -248,14 +258,14 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(CommandSender sender, String label) {
         sender.sendMessage(ChatColor.GOLD + settings.title);
-        sender.sendMessage(ChatColor.YELLOW + "/" + label + " <name>" + ChatColor.GRAY + " - Teleport to a warp");
+        sender.sendMessage(ChatColor.YELLOW + "/" + label + " go <name>" + ChatColor.GRAY + " - Teleport to a warp");
         sender.sendMessage(ChatColor.YELLOW + "/" + label + " list [page]" + ChatColor.GRAY + " - List warps");
         sender.sendMessage(ChatColor.YELLOW + "/" + label + " info <name>" + ChatColor.GRAY + " - Show warp details");
         if (sender.hasPermission(settings.createPermission)) {
-            sender.sendMessage(ChatColor.YELLOW + "/" + label + " set <name>" + ChatColor.GRAY + " - Create a warp");
+            sender.sendMessage(ChatColor.YELLOW + "/" + label + " create <name>" + ChatColor.GRAY + " - Create a warp");
         }
         if (sender.hasPermission(settings.removePermission)) {
-            sender.sendMessage(ChatColor.YELLOW + "/" + label + " remove <name>" + ChatColor.GRAY + " - Remove a warp");
+            sender.sendMessage(ChatColor.YELLOW + "/" + label + " delete <name>" + ChatColor.GRAY + " - Remove a warp");
         }
     }
 
@@ -273,16 +283,13 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
         List<String> options = new ArrayList<>();
         if (args.length == 1) {
-            options.addAll(Arrays.asList("help", "list", "info"));
+            options.addAll(Arrays.asList("help", "list", "info", "go"));
             if (sender.hasPermission(settings.createPermission)) {
-                options.add("set");
                 options.add("create");
             }
             if (sender.hasPermission(settings.removePermission)) {
-                options.add("remove");
                 options.add("delete");
             }
-            options.addAll(store.names());
         } else if (args.length == 2 && args[0].equalsIgnoreCase("list")) {
             int pageSize = Math.max(1, settings.listPageSize);
             int totalPages = (int) Math.ceil((double) store.all().size() / pageSize);
@@ -301,9 +308,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean isWarpNameSubCommand(String subCommand) {
-        return subCommand.equalsIgnoreCase("remove")
-                || subCommand.equalsIgnoreCase("delete")
-                || subCommand.equalsIgnoreCase("info");
+        return subCommand.equalsIgnoreCase("delete")
+                || subCommand.equalsIgnoreCase("info")
+                || subCommand.equalsIgnoreCase("go");
     }
 
     private String buildHeaderRow(int indexWidth, int nameWidth, int ownerWidth, int visitsWidth) {

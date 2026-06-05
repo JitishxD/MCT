@@ -78,14 +78,14 @@ commands:
 
   pwarp:
     description: Create and use player warps
-    usage: /pwarp <name|set|remove|list|info>
+    usage: /pwarp <go|create|delete|list|info>
     aliases:
       - pw
       - playerwarps
 
   swarp:
     description: Create and use server warps
-    usage: /swarp <name|set|remove|list|info>
+    usage: /swarp <go|create|delete|list|info>
     aliases:
       - serverwarp
       - serverwarps
