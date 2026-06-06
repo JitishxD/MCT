@@ -3,6 +3,63 @@
 # Default: 300 (5 minutes)
 afk-timeout-seconds: 300
 
+# ═══════════════════════════════════════════════════════════════════
+#                        TPA Configuration
+# ═══════════════════════════════════════════════════════════════════
+tpa:
+
+  # ── Timing (in seconds) ──────────────────────────────────────
+  request-timeout: 60         # How long a request stays active before expiring
+  teleport-delay: 5           # Countdown before teleporting (0 = instant)
+  back-delay: 5               # Countdown before /back teleport (0 = instant)
+  invincibility-duration: 5   # Seconds of invulnerability after teleporting
+
+  # ── Cooldowns (in seconds, 0 = no cooldown) ─────────────────
+  cooldowns:
+    tpa: 10
+    tpahere: 10
+    tpahereall: 10
+    back: 10
+
+  # ── Feature Toggles ─────────────────────────────────────────
+  # Set to false to disable individual features.
+  features:
+    back-command: true            # Enable /back command entirely
+    back-on-death: true           # Save death location for /back
+    back-on-quit: true            # Save quit location for /back
+    teleport-logging: false       # Save ALL teleport locations for /back (even from other plugins)
+    move-cancel: true             # Cancel pending teleport if the player moves
+    particles: true               # Show particles on teleport
+    sounds: true                  # Play sound on teleport
+    clickable-buttons: true       # Show clickable [ACCEPT] [DENY] buttons in chat
+    invincibility: true           # Brief invulnerability after teleporting
+    safe-teleport: true           # Find a safe landing spot for /back
+    interdimensional-travel: true # Allow TPA across different worlds
+    gamemode-check: true          # Block TPA in spectator mode
+
+  # ── Safe Teleport Search ─────────────────────────────────────
+  safe-teleport:
+    radius: 5         # Horizontal search radius (blocks)
+    vertical-cap: 64  # Max vertical search range (blocks)
+
+  # ── Sound & Particles ───────────────────────────────────────
+  sound: ENTITY_EXPERIENCE_ORB_PICKUP
+  sound-volume: 3.0
+  sound-pitch: 0.533
+  particle: POOF
+
+  # ── Disabled Worlds ─────────────────────────────────────────
+  # TPA commands won't work in these worlds.
+  disabled-worlds: []
+
+  # ── Messages ────────────────────────────────────────────────
+  # Set any message to "none" to disable it.
+  # Use & for color codes. Use %player% for the other player's name.
+  messages:
+    prefix: "&c[&6MCT&c]"
+    request-sent: "&7Teleport request sent to &e%player%&7."
+    request-received: "&e%player% &7sent you a teleport request."
+
 # Player warps are saved here automatically by /pwarp.
 player-warps:
   warps: {}

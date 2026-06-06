@@ -5,6 +5,11 @@ import me.jitish.mCT.listeners.AfkListener;
 import me.jitish.mCT.listeners.ColorCodesDemo;
 import me.jitish.mCT.listeners.SpawnEvents;
 import me.jitish.mCT.listeners.PingDisplayListener;
+import me.jitish.mCT.tpa.TpaListener;
+import me.jitish.mCT.tpa.TpaManager;
+import me.jitish.mCT.tpa.TpaSettings;
+import me.jitish.mCT.tpa.TpaStorage;
+import me.jitish.mCT.tpa.commands.*;
 import me.jitish.mCT.warps.WarpStore;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,6 +19,7 @@ public final class MCT extends JavaPlugin {
     private AfkListener afkListener;
     private WarpStore playerWarpStore;
     private WarpStore serverWarpStore;
+    private TpaStorage tpaStorage;
 
     //Getter for pluginInstanceVarWithMethod1
     public static MCT getPluginInstanceVar() {
@@ -84,12 +90,30 @@ public final class MCT extends JavaPlugin {
                 8
         ));
 
+        // TPA system
+        tpaStorage = new TpaStorage();
+        TpaSettings tpaSettings = new TpaSettings(this);
+        TpaManager tpaManager = new TpaManager(this, tpaStorage, tpaSettings);
+        TpaListener tpaListener = new TpaListener(tpaManager, tpaStorage, tpaSettings);
+
+        TpaCommand tpaCommand = new TpaCommand(tpaManager, tpaStorage, tpaSettings);
+        TpaHereCommand tpaHereCommand = new TpaHereCommand(tpaManager, tpaStorage, tpaSettings);
+        TpAcceptCommand tpAcceptCommand = new TpAcceptCommand(tpaManager);
+        TpDenyCommand tpDenyCommand = new TpDenyCommand(tpaManager);
+        TpCancelCommand tpCancelCommand = new TpCancelCommand(tpaManager);
+        BackCommand backCommand = new BackCommand(tpaManager, tpaStorage, tpaSettings);
+        TpaToggleCommand tpaToggleCommand = new TpaToggleCommand(tpaManager, tpaStorage);
+        TpaIgnoreCommand tpaIgnoreCommand = new TpaIgnoreCommand(tpaManager, tpaStorage);
+        TpautoCommand tpautoCommand = new TpautoCommand(tpaManager, tpaStorage);
+        TpaHereAllCommand tpaHereAllCommand = new TpaHereAllCommand(tpaManager, tpaStorage, tpaSettings);
+
         // Register event listeners
         getServer().getPluginManager().registerEvents(dieCommand, this);
         getServer().getPluginManager().registerEvents(new ColorCodesDemo(), this);
         getServer().getPluginManager().registerEvents(new SpawnEvents(this), this);
         getServer().getPluginManager().registerEvents(pingDisplayListener, this);
         getServer().getPluginManager().registerEvents(afkListener, this);
+        getServer().getPluginManager().registerEvents(tpaListener, this);
 
         // Register command executors
         getCommand("die").setExecutor(dieCommand);
@@ -110,6 +134,16 @@ public final class MCT extends JavaPlugin {
         getCommand("summonn").setExecutor(summonCommand);
         getCommand("pwarp").setExecutor(playerWarpsCommand);
         getCommand("swarp").setExecutor(serverWarpsCommand);
+        getCommand("tpa").setExecutor(tpaCommand);
+        getCommand("tpahere").setExecutor(tpaHereCommand);
+        getCommand("tpaccept").setExecutor(tpAcceptCommand);
+        getCommand("tpdeny").setExecutor(tpDenyCommand);
+        getCommand("tpcancel").setExecutor(tpCancelCommand);
+        getCommand("back").setExecutor(backCommand);
+        getCommand("tpatoggle").setExecutor(tpaToggleCommand);
+        getCommand("tpaignore").setExecutor(tpaIgnoreCommand);
+        getCommand("tpauto").setExecutor(tpautoCommand);
+        getCommand("tpahereall").setExecutor(tpaHereAllCommand);
 
         // Register tab completers (same instances — they implement both interfaces)
         getCommand("god").setTabCompleter(godCommand);
@@ -127,6 +161,16 @@ public final class MCT extends JavaPlugin {
         getCommand("summonn").setTabCompleter(summonCommand);
         getCommand("pwarp").setTabCompleter(playerWarpsCommand);
         getCommand("swarp").setTabCompleter(serverWarpsCommand);
+        getCommand("tpa").setTabCompleter(tpaCommand);
+        getCommand("tpahere").setTabCompleter(tpaHereCommand);
+        getCommand("tpaccept").setTabCompleter(tpAcceptCommand);
+        getCommand("tpdeny").setTabCompleter(tpDenyCommand);
+        getCommand("tpcancel").setTabCompleter(tpCancelCommand);
+        getCommand("back").setTabCompleter(backCommand);
+        getCommand("tpatoggle").setTabCompleter(tpaToggleCommand);
+        getCommand("tpaignore").setTabCompleter(tpaIgnoreCommand);
+        getCommand("tpauto").setTabCompleter(tpautoCommand);
+        getCommand("tpahereall").setTabCompleter(tpaHereAllCommand);
 
         // Start the AFK idle-checker scheduler
         afkListener.startIdleChecker();
@@ -143,6 +187,9 @@ public final class MCT extends JavaPlugin {
         }
         if (serverWarpStore != null) {
             serverWarpStore.save();
+        }
+        if (tpaStorage != null) {
+            tpaStorage.clearAll();
         }
     }
 }

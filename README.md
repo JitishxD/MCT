@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.8--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-0.0.9--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -48,6 +48,12 @@
 | 🧭 **Player Warps** | Players can create named warps and teleport to them | Self |
 | 🗺️ **Server Warps** | Admin-managed global warps for all players | Server-wide |
 | 🔒 **Private Warps** | Make warps private and grant/revoke access per-player | Self, Others |
+| 📨 **TPA System** | Request to teleport to/from other players with accept/deny | Self, Others |
+| ↩️ **Back Command** | Return to your previous location (death, quit, or teleport) | Self, Others |
+| 🔕 **TPA Toggle** | Disable receiving TPA requests entirely | Self, Others |
+| 🚫 **TPA Ignore** | Block a specific player's TPA requests | Self |
+| ⚡ **TPA Auto-Accept** | Automatically accept all incoming /tpa requests | Self |
+| 📢 **TPA Here All** | Request all online players to teleport to you | Server-wide |
 | 🎨 **Welcome Messages** | Styled join messages with time-since-last-visit | Automatic |
 | ⚰️ **Respawn at Spawn** | Players respawn at the custom spawn point | Automatic |
 | 🆕 **First-Join Teleport** | New players spawn at the custom spawn point | Automatic |
@@ -81,11 +87,22 @@
 | `/pwarp allow` | — | Grant a player access to a private warp | `/pwarp allow <warp> <player>` |
 | `/pwarp deny` | — | Revoke a player's access to a private warp | `/pwarp deny <warp> <player>` |
 | `/pwarp allowed` | — | List all players with access to a warp | `/pwarp allowed <warp>` |
+| `/tpa` | — | Request to teleport to another player | `/tpa <player>` |
+| `/tpahere` | — | Request another player to teleport to you | `/tpahere <player>` |
+| `/tpaccept` | `/tpyes`, `/accept` | Accept a pending teleport request | `/tpaccept` |
+| `/tpdeny` | `/tpno`, `/deny` | Deny a pending teleport request | `/tpdeny` |
+| `/tpcancel` | — | Cancel your outgoing teleport request | `/tpcancel <player>` |
+| `/back` | — | Teleport to your previous location | `/back [player]` |
+| `/tpatoggle` | — | Toggle receiving TPA requests on/off | `/tpatoggle [player]` |
+| `/tpaignore` | `/tpignore`, `/tpblock`, `/tpablock` | Ignore a player's TPA requests (toggle) | `/tpaignore <player>` |
+| `/tpauto` | — | Toggle auto-accepting incoming /tpa requests | `/tpauto` |
+| `/tpahereall` | — | Send teleport-here request to all online players | `/tpahereall` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
 > **Storage:** Player warps are saved in `config.yml` under `player-warps.warps`; server warps are saved under `server-warps.warps`.
 > **Privacy:** The `private`, `allow`, `deny`, and `allowed` subcommands work identically for both `/pwarp` and `/swarp`. Private warps show a 🔒 icon in the list and are hidden from tab-complete for unauthorized players. The warp owner and admins can always manage access.
 > **Filter:** Use `/pwarp list <player>` to show only warps owned by a specific player. Supports tab-completion of owner names. Works for both `/pwarp` and `/swarp`.
+> **TPA:** Requests expire after 60 seconds (configurable). Teleportation has a 5-second countdown with move-cancel, post-teleport invincibility, particles, and sounds. All timings, cooldowns, and features are fully configurable in `config.yml` under `tpa:`.
 > **Note:** `/summonn` supports custom entity variants. Try aliases like `charged_creeper`, `baby_zombie`, `black_cat`, `temperate_frog`, `pale_wolf`, `warm_chicken`, `red_mooshroom`.
 > **Combo aliases:** `chicken_jockey`, `husk_jockey`, `drowned_jockey`, `zombie_villager_jockey`, `spider_jockey`, `cave_spider_jockey`, `skeleton_horse_trap`, `pillager_ravager`, `evoker_ravager`, `vindicator_ravager`, `strider_jockey`, `baby_piglin_hoglin`.
 
@@ -121,6 +138,19 @@
 | `MCT.pwarp.admin` | Remove any player warp, manage any warp's privacy/access | OP | `MCT.pwarp.remove` |
 | `MCT.swarp` | Use `/swarp` and teleport to server warps | Everyone | — |
 | `MCT.swarp.admin` | Create/remove server warps, manage any server warp's privacy/access | OP | `MCT.swarp` |
+| `MCT.tpa` | Use `/tpa` to send teleport requests | Everyone | — |
+| `MCT.tpahere` | Use `/tpahere` to request players to you | Everyone | — |
+| `MCT.tpaccept` | Use `/tpaccept` to accept requests | Everyone | — |
+| `MCT.tpdeny` | Use `/tpdeny` to deny requests | Everyone | — |
+| `MCT.tpcancel` | Use `/tpcancel` to cancel outgoing requests | Everyone | — |
+| `MCT.tpatoggle` | Use `/tpatoggle` to toggle TPA on/off | Everyone | — |
+| `MCT.tpatoggle.others` | Toggle TPA for other players | OP | `MCT.tpatoggle` |
+| `MCT.tpaignore` | Use `/tpaignore` to block a player's requests | Everyone | — |
+| `MCT.tpauto` | Use `/tpauto` to auto-accept requests | Everyone | — |
+| `MCT.back` | Use `/back` to return to previous location | Everyone | — |
+| `MCT.back.others` | Send other players to their previous location | OP | `MCT.back` |
+| `MCT.tpahereall` | Use `/tpahereall` to request all players | OP | — |
+| `MCT.tpa.bypasscooldown` | Bypass all TPA cooldowns | OP | — |
 
 > **Note:** Parent permissions automatically inherit their children. For example, granting `MCT.godMode.toOtherPlayers` also grants `MCT.godMode`.
 
@@ -136,6 +166,10 @@
 | **Player Join (Ping)** | Auto-enables ping display on the action bar for eligible players | [PingDisplayListener.java#L29](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L29) |
 | **Player Quit** | Automatically cleans up ping display tasks | [PingDisplayListener.java#L35](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L35) |
 | **Activity Tracking** | Monitors chats, moves, interactions to reset AFK timeout | [AfkListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/AfkListener.java) |
+| **Player Death (TPA)** | Saves death location for `/back` if enabled | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
+| **Player Quit (TPA)** | Saves quit location for `/back`, cleans up pending requests | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
+| **Player Move (TPA)** | Cancels pending teleport if player moves >2 blocks during delay | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
+| **Player Teleport (TPA)** | Optionally logs all teleport locations for `/back` | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
 
 
 ---
@@ -199,6 +233,22 @@ MCT/
 │   │   │   ├── ColorCodesDemo.java           # Join message formatting
 │   │   │   ├── PingDisplayListener.java      # Action bar ping display
 │   │   │   └── SpawnEvents.java              # Spawn/respawn handling
+│   │   ├── tpa/
+│   │   │   ├── TpaManager.java               # Core TPA logic (requests, teleport, safe-TP)
+│   │   │   ├── TpaStorage.java               # In-memory state (requests, cooldowns, toggles)
+│   │   │   ├── TpaSettings.java              # Config reader for tpa: section
+│   │   │   ├── TpaListener.java              # TPA events (death, quit, move, teleport)
+│   │   │   └── commands/
+│   │   │       ├── TpaCommand.java            # /tpa
+│   │   │       ├── TpaHereCommand.java        # /tpahere
+│   │   │       ├── TpAcceptCommand.java       # /tpaccept
+│   │   │       ├── TpDenyCommand.java         # /tpdeny
+│   │   │       ├── TpCancelCommand.java       # /tpcancel
+│   │   │       ├── BackCommand.java           # /back
+│   │   │       ├── TpaToggleCommand.java      # /tpatoggle
+│   │   │       ├── TpaIgnoreCommand.java      # /tpaignore
+│   │   │       ├── TpautoCommand.java         # /tpauto
+│   │   │       └── TpaHereAllCommand.java     # /tpahereall
 │   │   └── warps/
 │   │       ├── WarpPoint.java                # Warp data (name, location, privacy, access list)
 │   │       └── WarpStore.java                # Warp persistence & access queries
@@ -237,6 +287,7 @@ MCT/
 
 | Version | MC Version | Highlights |
 |:--------|:-----------|:-----------|
+| `0.0.9-26.1.2` | 26.1.2 | Integrated SimpleTpa: /tpa, /tpahere, /tpaccept, /tpdeny, /tpcancel, /back, /tpatoggle, /tpaignore, /tpauto, /tpahereall with full config |
 | `0.0.8-26.1.2` | 26.1.2 | Private warps with per-player access control; compact inline warp list; player name filter for list command |
 | `0.0.7-26.1.2` | 26.1.2 | Added dependency-free player warps and admin-managed server warps |
 | `0.0.6-26.1.2` | 26.1.2 | Enchant (up to 255), Disenchant, and Mass Summon commands |

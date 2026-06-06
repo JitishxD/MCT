@@ -91,6 +91,56 @@ commands:
       - serverwarp
       - serverwarps
 
+  tpa:
+    description: Send a teleport request to another player
+    usage: /tpa <player>
+
+  tpahere:
+    description: Request another player to teleport to you
+    usage: /tpahere <player>
+
+  tpaccept:
+    description: Accept a pending teleport request
+    usage: /tpaccept
+    aliases:
+      - tpyes
+      - accept
+
+  tpdeny:
+    description: Deny a pending teleport request
+    usage: /tpdeny
+    aliases:
+      - tpno
+      - deny
+
+  tpcancel:
+    description: Cancel your outgoing teleport request
+    usage: /tpcancel <player>
+
+  back:
+    description: Teleport to your previous location
+    usage: /back [player]
+
+  tpatoggle:
+    description: Toggle receiving TPA requests on/off
+    usage: /tpatoggle [player]
+
+  tpaignore:
+    description: Ignore a specific player's TPA requests
+    usage: /tpaignore <player>
+    aliases:
+      - tpignore
+      - tpblock
+      - tpablock
+
+  tpauto:
+    description: Toggle auto-accepting all incoming /tpa requests
+    usage: /tpauto
+
+  tpahereall:
+    description: Send a teleport-here request to all online players
+    usage: /tpahereall
+
 permissions:
   MCT.setSpawn:
     description: permission to use /setSpawn commands
@@ -214,3 +264,47 @@ permissions:
     default: op
     children:
       MCT.swarp: true
+
+  MCT.tpa:
+    description: Send teleport requests
+    default: true
+  MCT.tpahere:
+    description: Send teleport-here requests
+    default: true
+  MCT.tpaccept:
+    description: Accept teleport requests
+    default: true
+  MCT.tpdeny:
+    description: Deny teleport requests
+    default: true
+  MCT.tpcancel:
+    description: Cancel outgoing teleport requests
+    default: true
+  MCT.tpatoggle:
+    description: Toggle receiving TPA requests
+    default: true
+  MCT.tpatoggle.others:
+    description: Toggle TPA for other players
+    default: op
+    children:
+      MCT.tpatoggle: true
+  MCT.tpaignore:
+    description: Ignore a player's TPA requests
+    default: true
+  MCT.tpauto:
+    description: Auto-accept incoming /tpa requests
+    default: true
+  MCT.back:
+    description: Teleport to previous location
+    default: true
+  MCT.back.others:
+    description: Send other players to their previous location
+    default: op
+    children:
+      MCT.back: true
+  MCT.tpahereall:
+    description: Send teleport-here request to all players
+    default: op
+  MCT.tpa.bypasscooldown:
+    description: Bypass all TPA cooldowns
+    default: op
