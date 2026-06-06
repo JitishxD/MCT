@@ -7,12 +7,15 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class WarpStore {
     private final MCT plugin;
@@ -54,7 +57,20 @@ public class WarpStore {
                 String ownerName = warpSection.getString("owner-name", "Unknown");
                 int visits = warpSection.getInt("visits", 0);
                 long createdAt = warpSection.getLong("created-at", System.currentTimeMillis());
-                warps.put(normalize(name), new WarpPoint(name, ownerId, ownerName, location, visits, createdAt));
+                boolean isPrivate = warpSection.getBoolean("private", false);
+
+                Set<UUID> allowedPlayers = new HashSet<>();
+                List<String> allowedList = warpSection.getStringList("allowed-players");
+                for (String uuidStr : allowedList) {
+                    try {
+                        allowedPlayers.add(UUID.fromString(uuidStr));
+                    } catch (IllegalArgumentException ignored) {
+                        plugin.getLogger().warning("Skipping invalid allowed-player UUID in " + label + " '" + key + "': " + uuidStr);
+                    }
+                }
+
+                warps.put(normalize(name), new WarpPoint(name, ownerId, ownerName, location, visits, createdAt,
+                        isPrivate, allowedPlayers));
             } catch (IllegalArgumentException exception) {
                 plugin.getLogger().warning("Skipping " + label + " with invalid owner UUID: " + key);
             }
@@ -73,6 +89,9 @@ public class WarpStore {
             warpSection.set("location", warp.getLocation());
             warpSection.set("visits", warp.getVisits());
             warpSection.set("created-at", warp.getCreatedAt());
+            warpSection.set("private", warp.isPrivate());
+            warpSection.set("allowed-players",
+                    warp.getAllowedPlayers().stream().map(UUID::toString).collect(Collectors.toList()));
         }
 
         plugin.saveConfig();
@@ -85,7 +104,9 @@ public class WarpStore {
                 player.getName(),
                 player.getLocation(),
                 0,
-                System.currentTimeMillis()
+                System.currentTimeMillis(),
+                false,
+                new HashSet<>()
         );
         warps.put(normalize(name), warp);
         save();
@@ -119,6 +140,21 @@ public class WarpStore {
         List<String> names = new ArrayList<>();
         for (WarpPoint warp : all()) {
             names.add(warp.getName());
+        }
+        return names;
+    }
+
+    /**
+     * Returns warp names that the given player can access (public warps, owned warps,
+     * and warps where the player has been explicitly allowed).
+     * Used for tab-completion to hide private warps from unauthorized players.
+     */
+    public List<String> accessibleNames(UUID playerId) {
+        List<String> names = new ArrayList<>();
+        for (WarpPoint warp : all()) {
+            if (warp.canAccess(playerId)) {
+                names.add(warp.getName());
+            }
         }
         return names;
     }
