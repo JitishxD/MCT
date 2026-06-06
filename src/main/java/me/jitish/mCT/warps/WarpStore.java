@@ -159,6 +159,31 @@ public class WarpStore {
         return names;
     }
 
+    /**
+     * Returns warps owned by the given player name (case-insensitive match).
+     */
+    public List<WarpPoint> byOwner(String ownerName) {
+        List<WarpPoint> result = new ArrayList<>();
+        for (WarpPoint warp : all()) {
+            if (warp.getOwnerName().equalsIgnoreCase(ownerName)) {
+                result.add(warp);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a deduplicated, sorted list of all warp owner names.
+     * Used for tab-completion of the list filter.
+     */
+    public List<String> ownerNames() {
+        Set<String> names = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (WarpPoint warp : warps.values()) {
+            names.add(warp.getOwnerName());
+        }
+        return new ArrayList<>(names);
+    }
+
     private String normalize(String name) {
         return name.toLowerCase(Locale.ENGLISH);
     }

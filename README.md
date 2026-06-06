@@ -76,14 +76,16 @@
 | `/summonn` | — | Summon multiple entities at once | `/summonn <entity> [amount] [player \| x y z]` |
 | `/pwarp` | `/pw`, `/playerwarps` | Create, list, inspect, remove, and use player warps | `/pwarp <name>` or `/pwarp create <name>` |
 | `/swarp` | `/sw`, `/serverwarp`, `/serverwarps` | Use admin-managed server warps | `/swarp <name>` or `/swarp create <name>` |
+| `/pwarp list` | — | List warps with optional player name filter | `/pwarp list [player] [page]` |
 | `/pwarp private` | — | Toggle a player warp between public/private | `/pwarp private <name>` |
 | `/pwarp allow` | — | Grant a player access to a private warp | `/pwarp allow <warp> <player>` |
 | `/pwarp deny` | — | Revoke a player's access to a private warp | `/pwarp deny <warp> <player>` |
 | `/pwarp allowed` | — | List all players with access to a warp | `/pwarp allowed <warp>` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
-> **Storage:** player warps are saved in `config.yml` under `player-warps.warps`; server warps are saved under `server-warps.warps`.
+> **Storage:** Player warps are saved in `config.yml` under `player-warps.warps`; server warps are saved under `server-warps.warps`.
 > **Privacy:** The `private`, `allow`, `deny`, and `allowed` subcommands work identically for both `/pwarp` and `/swarp`. Private warps show a 🔒 icon in the list and are hidden from tab-complete for unauthorized players. The warp owner and admins can always manage access.
+> **Filter:** Use `/pwarp list <player>` to show only warps owned by a specific player. Supports tab-completion of owner names. Works for both `/pwarp` and `/swarp`.
 > **Note:** `/summonn` supports custom entity variants. Try aliases like `charged_creeper`, `baby_zombie`, `black_cat`, `temperate_frog`, `pale_wolf`, `warm_chicken`, `red_mooshroom`.
 > **Combo aliases:** `chicken_jockey`, `husk_jockey`, `drowned_jockey`, `zombie_villager_jockey`, `spider_jockey`, `cave_spider_jockey`, `skeleton_horse_trap`, `pillager_ravager`, `evoker_ravager`, `vindicator_ravager`, `strider_jockey`, `baby_piglin_hoglin`.
 
@@ -235,7 +237,7 @@ MCT/
 
 | Version | MC Version | Highlights |
 |:--------|:-----------|:-----------|
-| `0.0.8-26.1.2` | 26.1.2 | Private warps with per-player access control; wider list table columns |
+| `0.0.8-26.1.2` | 26.1.2 | Private warps with per-player access control; compact inline warp list; player name filter for list command |
 | `0.0.7-26.1.2` | 26.1.2 | Added dependency-free player warps and admin-managed server warps |
 | `0.0.6-26.1.2` | 26.1.2 | Enchant (up to 255), Disenchant, and Mass Summon commands |
 | `0.0.5-26.1.2` | 26.1.2 | SetFood cleanup, AFK and repair commands |

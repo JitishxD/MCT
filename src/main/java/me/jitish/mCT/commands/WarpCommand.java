@@ -290,25 +290,47 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     }
 
     private void listWarps(CommandSender sender, String label, String[] args) {
-        if (args.length > 2) {
-            sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " list [page]");
+        // Syntax: /cmd list [player] [page]
+        if (args.length > 3) {
+            sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " list [player] [page]");
             return;
         }
 
+        String filterOwner = null;
         int page = 1;
+
         if (args.length == 2) {
+            // Could be a page number or a player name
             try {
                 page = Integer.parseInt(args[1]);
-            } catch (NumberFormatException exception) {
-                sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " list [page]");
+            } catch (NumberFormatException e) {
+                filterOwner = args[1];
+            }
+        } else if (args.length == 3) {
+            // First is player name, second is page
+            filterOwner = args[1];
+            try {
+                page = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage(ChatColor.YELLOW + "Usage: /" + label + " list [player] [page]");
                 return;
             }
         }
 
-        List<WarpPoint> warps = store.all();
-        if (warps.isEmpty()) {
-            sender.sendMessage(ChatColor.YELLOW + "There are no " + settings.warpLabelPlural + " yet.");
-            return;
+        List<WarpPoint> warps;
+        if (filterOwner != null) {
+            warps = store.byOwner(filterOwner);
+            if (warps.isEmpty()) {
+                sender.sendMessage(ChatColor.RED + "No " + settings.warpLabelPlural + " found for player "
+                        + ChatColor.YELLOW + filterOwner + ChatColor.RED + ".");
+                return;
+            }
+        } else {
+            warps = store.all();
+            if (warps.isEmpty()) {
+                sender.sendMessage(ChatColor.YELLOW + "There are no " + settings.warpLabelPlural + " yet.");
+                return;
+            }
         }
 
         int pageSize = Math.max(1, settings.listPageSize);
@@ -321,10 +343,14 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         int startIndex = (page - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, warps.size());
 
-        // Title bar
+        // Title bar (show filter info if active)
+        String titleExtra = "";
+        if (filterOwner != null) {
+            titleExtra = " &8\u2502 &7Filter: &e" + filterOwner;
+        }
         sender.sendMessage("");
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&6&l\u2B50 " + settings.title + " &8&l\u2502 &7Page &f" + page + "&7/&f" + totalPages
+                "&6&l\u2B50 " + settings.title + titleExtra + " &8&l\u2502 &7Page &f" + page + "&7/&f" + totalPages
                         + " &8(&7" + warps.size() + " total&8)"));
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                 "&8&m                                                  "));
@@ -348,8 +374,8 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 row.append(ChatColor.GREEN).append(warp.getName());
             }
 
-            // Owner (if shown)
-            if (settings.showOwnerInList) {
+            // Owner (if shown and not filtering by owner — redundant when filtered)
+            if (settings.showOwnerInList && filterOwner == null) {
                 row.append(ChatColor.DARK_GRAY).append(" \u00BB ")
                         .append(ChatColor.YELLOW).append(warp.getOwnerName());
             }
@@ -383,7 +409,10 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                 "&8&m                                                  "));
         if (totalPages > 1) {
-            sender.sendMessage(ChatColor.GRAY + "Use " + ChatColor.YELLOW + "/" + label + " list <page>"
+            String pageHint = filterOwner != null
+                    ? "/" + label + " list " + filterOwner + " <page>"
+                    : "/" + label + " list <page>";
+            sender.sendMessage(ChatColor.GRAY + "Use " + ChatColor.YELLOW + pageHint
                     + ChatColor.GRAY + " to view other pages.");
         }
     }
@@ -464,7 +493,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender, String label) {
         sender.sendMessage(ChatColor.GOLD + settings.title);
         sender.sendMessage(ChatColor.YELLOW + "/" + label + " go <name>" + ChatColor.GRAY + " - Teleport to a warp");
-        sender.sendMessage(ChatColor.YELLOW + "/" + label + " list [page]" + ChatColor.GRAY + " - List warps");
+        sender.sendMessage(ChatColor.YELLOW + "/" + label + " list [player] [page]" + ChatColor.GRAY + " - List warps (optionally filter by player)");
         sender.sendMessage(ChatColor.YELLOW + "/" + label + " info <name>" + ChatColor.GRAY + " - Show warp details");
         if (sender.hasPermission(settings.createPermission)) {
             sender.sendMessage(ChatColor.YELLOW + "/" + label + " create <name>" + ChatColor.GRAY + " - Create a warp");
@@ -500,11 +529,24 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
                 options.add("delete");
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("list")) {
+            // Suggest page numbers and player names
             int pageSize = Math.max(1, settings.listPageSize);
             int totalPages = (int) Math.ceil((double) store.all().size() / pageSize);
             int maxPage = Math.min(totalPages, 10);
             for (int i = 1; i <= maxPage; i++) {
                 options.add(String.valueOf(i));
+            }
+            options.addAll(store.ownerNames());
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("list")) {
+            // Third arg is page number when filtering by player
+            List<WarpPoint> filtered = store.byOwner(args[1]);
+            if (!filtered.isEmpty()) {
+                int pageSize = Math.max(1, settings.listPageSize);
+                int totalPages = (int) Math.ceil((double) filtered.size() / pageSize);
+                int maxPage = Math.min(totalPages, 10);
+                for (int i = 1; i <= maxPage; i++) {
+                    options.add(String.valueOf(i));
+                }
             }
         } else if (args.length == 2 && isWarpNameSubCommand(args[0])) {
             // For go/info: only show accessible warps (hides private warps from tab-complete)
