@@ -1,4 +1,4 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,67 +11,61 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fly implements CommandExecutor, TabCompleter {
+public class God implements CommandExecutor, TabCompleter {
 
-    private void toggleFlying(Player p) {
-        if (!p.getAllowFlight()) {
-            p.setAllowFlight(true);
-            p.setFlying(true);
-            p.sendMessage(ChatColor.GREEN + "Fly mode enabled!");
+    private void toggleGodMode(Player p) {
+        if (p.isInvulnerable()) {
+            p.setInvulnerable(false);
+            p.sendMessage(ChatColor.RED + "God mode is disabled!");
         } else {
-            p.setAllowFlight(false);
-            p.setFlying(false);
-            p.sendMessage(ChatColor.RED + "Fly mode disabled!");
+            p.setInvulnerable(true);
+            p.sendMessage(ChatColor.GREEN + "God mode is enabled!");
         }
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player p) {
-            if (!p.hasPermission("MCT.fly")) {
+            if (!p.hasPermission("MCT.godMode")) {
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));
                 return true;
             }
         }
 
         if (sender instanceof Player p) {
-            if (args.length == 1 && args[0].equalsIgnoreCase("all") && p.hasPermission("MCT.fly.toOtherPlayers")) {
+            if (args.length == 1 && args[0].equalsIgnoreCase("all") && p.hasPermission("MCT.godMode.toOtherPlayers")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    this.toggleFlying(player);
+                    this.toggleGodMode(player);
                 }
-                p.sendMessage(ChatColor.GREEN + "You toggled fly mode for all players on the server!");
+                p.sendMessage(ChatColor.GREEN + "You toggled God mode for all players on the server!");
                 return true;
-            } else if (args.length == 2 && args[0].equalsIgnoreCase("all") && p.hasPermission("MCT.fly.toOtherPlayers")) {
+            } else if (args.length == 2 && args[0].equalsIgnoreCase("all") && p.hasPermission("MCT.godMode.toOtherPlayers")) {
                 if (args[1].equalsIgnoreCase("on")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        player.setAllowFlight(true);
-                        player.setFlying(true);
-                        player.sendMessage(ChatColor.GREEN + "Fly mode enabled!");
-
+                        player.setInvulnerable(true);
+                        player.sendMessage(ChatColor.GREEN + "God mode enabled!");
                     }
-                    p.sendMessage(ChatColor.GREEN + "You turned on fly mode for all players on the server!");
+                    p.sendMessage(ChatColor.GREEN + "You turned on God mode for all players on the server!");
                 } else if (args[1].equalsIgnoreCase("off")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        player.setAllowFlight(false);
-                        player.setFlying(false);
-                        player.sendMessage(ChatColor.RED + "Fly mode disabled!");
-
+                        player.setInvulnerable(false);
+                        player.sendMessage(ChatColor.RED + "God mode disabled!");
                     }
-                    p.sendMessage(ChatColor.RED + "You turned off fly mode for all players on the server!");
+                    p.sendMessage(ChatColor.RED + "You turned off god mode for all players on the server!");
                 }
                 return true;
-            } else if (args.length > 0 && p.hasPermission("MCT.fly.toOtherPlayers")) {
+            } else if (args.length > 0 && p.hasPermission("MCT.godMode.toOtherPlayers")) {
                 for (String playerName : args) {
                     try {
                         Player target = Bukkit.getServer().getPlayerExact(playerName);
-                        this.toggleFlying(target);
-                        sender.sendMessage("You have toggled fly mode for " + ChatColor.GREEN + target.getDisplayName());
+                        this.toggleGodMode(target);
+                        sender.sendMessage("You have toggled Godmode for " + ChatColor.GREEN + target.getDisplayName());
                     } catch (Exception NullPointerException) {
                         sender.sendMessage(ChatColor.RED + playerName + ChatColor.WHITE + " is not online.");
                     }
                 }
             } else {
-                this.toggleFlying(p);
+                this.toggleGodMode(p);
             }
         } else {
             System.out.println("Come to the server bro");

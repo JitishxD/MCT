@@ -1,4 +1,4 @@
-package me.jitish.mCT.listeners;
+package me.jitish.mCT.tools.listeners;
 
 import me.jitish.mCT.MCT;
 import net.md_5.bungee.api.ChatMessageType;

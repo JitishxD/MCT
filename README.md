@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.9--26.1.2-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-1.0.0--26.1-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -160,12 +160,12 @@
 
 | Event | Behavior | Source |
 |:------|:---------|:-------|
-| **Player Join** | Displays a styled welcome/welcome-back message with color codes and time since last visit | [ColorCodesDemo.java#L26](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/ColorCodesDemo.java#L26) |
-| **Player Join (First Time)** | Teleports new players to the custom spawn point | [SpawnEvents.java#L19](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/SpawnEvents.java#L19) |
-| **Player Respawn** | Respawns players at the custom spawn point (if set) | [SpawnEvents.java#L33](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/SpawnEvents.java#L33) |
-| **Player Join (Ping)** | Auto-enables ping display on the action bar for eligible players | [PingDisplayListener.java#L29](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L29) |
-| **Player Quit** | Automatically cleans up ping display tasks | [PingDisplayListener.java#L35](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/PingDisplayListener.java#L35) |
-| **Activity Tracking** | Monitors chats, moves, interactions to reset AFK timeout | [AfkListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/listeners/AfkListener.java) |
+| **Player Join** | Displays a styled welcome/welcome-back message with color codes and time since last visit | [ColorCodesDemo.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/listeners/ColorCodesDemo.java) |
+| **Player Join (First Time)** | Teleports new players to the custom spawn point | [SpawnEvents.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/spawn/SpawnEvents.java) |
+| **Player Respawn** | Respawns players at the custom spawn point (if set) | [SpawnEvents.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/spawn/SpawnEvents.java) |
+| **Player Join (Ping)** | Auto-enables ping display on the action bar for eligible players | [PingDisplayListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/listeners/PingDisplayListener.java) |
+| **Player Quit** | Automatically cleans up ping display tasks | [PingDisplayListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/listeners/PingDisplayListener.java) |
+| **Activity Tracking** | Monitors chats, moves, interactions to reset AFK timeout | [AfkListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tools/listeners/AfkListener.java) |
 | **Player Death (TPA)** | Saves death location for `/back` if enabled | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
 | **Player Quit (TPA)** | Saves quit location for `/back`, cleans up pending requests | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
 | **Player Move (TPA)** | Cancels pending teleport if player moves >2 blocks during delay | [TpaListener.java](https://github.com/jitishxd/mct/blob/main/src/main/java/me/jitish/mCT/tpa/TpaListener.java) |
@@ -210,30 +210,32 @@ MCT/
 ├── src/main/
 │   ├── java/me/jitish/mCT/
 │   │   ├── MCT.java                          # Main plugin class
-│   │   ├── commands/
-│   │   │   ├── Afk.java                      # /afk command
-│   │   │   ├── Die.java                      # /die command + death event
-│   │   │   ├── FeedMe.java                   # /feedme command
-│   │   │   ├── Fly.java                      # /fly command
-│   │   │   ├── God.java                      # /god command
-│   │   │   ├── HealMe.java                   # /healme command
-│   │   │   ├── NightVision.java              # /nightvision command
-│   │   │   ├── Ping.java                     # /ping command
-│   │   │   ├── Repair.java                   # /repair command
-│   │   │   ├── Enchantt.java                  # /enchantt command
-│   │   │   ├── Denchant.java                  # /denchant command
-│   │   │   ├── Summonn.java                   # /summonn command
-│   │   │   ├── WarpCommand.java                # /pwarp and /swarp command handler
-│   │   │   ├── SetFood.java                  # /setFood command
-│   │   │   ├── SetHealth.java                # /setHealth command
-│   │   │   ├── SetSpawn.java                 # /setspawn command
-│   │   │   └── Spawn.java                    # /spawn command
-│   │   ├── listeners/
-│   │   │   ├── AfkListener.java              # AFK idle tracking
-│   │   │   ├── ColorCodesDemo.java           # Join message formatting
-│   │   │   ├── PingDisplayListener.java      # Action bar ping display
-│   │   │   └── SpawnEvents.java              # Spawn/respawn handling
-│   │   ├── tpa/
+│   │   ├── tools/                            # General utility features
+│   │   │   ├── commands/                     # Utility commands
+│   │   │   │   ├── Afk.java                  # /afk command
+│   │   │   │   ├── Die.java                  # /die command + death event
+│   │   │   │   ├── FeedMe.java               # /feedme command
+│   │   │   │   ├── Fly.java                  # /fly command
+│   │   │   │   ├── God.java                  # /god command
+│   │   │   │   ├── HealMe.java               # /healme command
+│   │   │   │   ├── NightVision.java          # /nightvision command
+│   │   │   │   ├── Ping.java                 # /ping command
+│   │   │   │   ├── Repair.java               # /repair command
+│   │   │   │   ├── Enchantt.java             # /enchantt command
+│   │   │   │   ├── Denchant.java             # /denchant command
+│   │   │   │   ├── Summonn.java              # /summonn command
+│   │   │   │   ├── SummonnVariants.java       # Entity variant registry
+│   │   │   │   ├── SetFood.java              # /setFood command
+│   │   │   │   └── SetHealth.java            # /setHealth command
+│   │   │   ├── listeners/                    # Utility event listeners
+│   │   │   │   ├── AfkListener.java          # AFK idle tracking
+│   │   │   │   ├── ColorCodesDemo.java       # Join message formatting
+│   │   │   │   └── PingDisplayListener.java  # Action bar ping display
+│   │   │   └── spawn/                        # Spawn system
+│   │   │       ├── SetSpawn.java             # /setspawn command
+│   │   │       ├── Spawn.java                # /spawn command
+│   │   │       └── SpawnEvents.java          # Spawn/respawn handling
+│   │   ├── tpa/                              # TPA teleport system
 │   │   │   ├── TpaManager.java               # Core TPA logic (requests, teleport, safe-TP)
 │   │   │   ├── TpaStorage.java               # In-memory state (requests, cooldowns, toggles)
 │   │   │   ├── TpaSettings.java              # Config reader for tpa: section
@@ -249,7 +251,8 @@ MCT/
 │   │   │       ├── TpaIgnoreCommand.java      # /tpaignore
 │   │   │       ├── TpautoCommand.java         # /tpauto
 │   │   │       └── TpaHereAllCommand.java     # /tpahereall
-│   │   └── warps/
+│   │   └── warps/                            # Warp system
+│   │       ├── WarpCommand.java              # /pwarp and /swarp command handler
 │   │       ├── WarpPoint.java                # Warp data (name, location, privacy, access list)
 │   │       └── WarpStore.java                # Warp persistence & access queries
 │   └── resources/
@@ -285,15 +288,16 @@ MCT/
 
 ## 📌 Version History
 
-| Version | MC Version | Highlights |
-|:--------|:-----------|:-----------|
-| `0.0.9-26.1.2` | 26.1.2 | Integrated SimpleTpa: /tpa, /tpahere, /tpaccept, /tpdeny, /tpcancel, /back, /tpatoggle, /tpaignore, /tpauto, /tpahereall with full config |
-| `0.0.8-26.1.2` | 26.1.2 | Private warps with per-player access control; compact inline warp list; player name filter for list command |
-| `0.0.7-26.1.2` | 26.1.2 | Added dependency-free player warps and admin-managed server warps |
-| `0.0.6-26.1.2` | 26.1.2 | Enchant (up to 255), Disenchant, and Mass Summon commands |
-| `0.0.5-26.1.2` | 26.1.2 | SetFood cleanup, AFK and repair commands |
-| `0.0.4-26.1.2` | 26.1.2 | Updated to Minecraft 26.1.2, Gradle 9.5.1 |
-| `0.0.3-1.21.11` | 1.21.x | Added ping display, fly, god mode |
+| Version | MC Version | Highlights                                                                                                  |
+|:--------|:-----------|:------------------------------------------------------------------------------------------------------------|
+| `1.0.0-26.1` | 26.1       | Release V1! restructured into feature-based packages (tools/, tpa/, warps/)                                 |
+| `0.0.9-26.1.2` | 26.1.2     | Integrated SimpleTpa: /tpa, /tpahere, /tpaccept, /tpdeny, /tpcancel, /back, /tpatoggle, /tpaignore, /tpauto, /tpahereall with full config |
+| `0.0.8-26.1.2` | 26.1.2     | Private warps with per-player access control; compact inline warp list; player name filter for list command |
+| `0.0.7-26.1.2` | 26.1.2     | Added dependency-free player warps and admin-managed server warps                                           |
+| `0.0.6-26.1.2` | 26.1.2     | Enchant (up to 255), Disenchant, and Mass Summon commands                                                   |
+| `0.0.5-26.1.2` | 26.1.2     | SetFood cleanup, AFK and repair commands                                                                    |
+| `0.0.4-26.1.2` | 26.1.2     | Updated to Minecraft 26.1.2, Gradle 9.5.1                                                                   |
+| `0.0.3-1.21.11` | 1.21.x     | Added ping display, fly, god mode                                                                           |
 
 ---
 

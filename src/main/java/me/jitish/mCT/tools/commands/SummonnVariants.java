@@ -1,4 +1,4 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;

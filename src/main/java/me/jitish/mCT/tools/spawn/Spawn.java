@@ -1,4 +1,4 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.spawn;
 
 import me.jitish.mCT.MCT;
 import org.bukkit.Location;

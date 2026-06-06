@@ -1,15 +1,18 @@
 package me.jitish.mCT;
 
-import me.jitish.mCT.commands.*;
-import me.jitish.mCT.listeners.AfkListener;
-import me.jitish.mCT.listeners.ColorCodesDemo;
-import me.jitish.mCT.listeners.SpawnEvents;
-import me.jitish.mCT.listeners.PingDisplayListener;
+import me.jitish.mCT.tools.commands.*;
+import me.jitish.mCT.tools.listeners.AfkListener;
+import me.jitish.mCT.tools.listeners.ColorCodesDemo;
+import me.jitish.mCT.tools.listeners.PingDisplayListener;
+import me.jitish.mCT.tools.spawn.SetSpawn;
+import me.jitish.mCT.tools.spawn.Spawn;
+import me.jitish.mCT.tools.spawn.SpawnEvents;
 import me.jitish.mCT.tpa.TpaListener;
 import me.jitish.mCT.tpa.TpaManager;
 import me.jitish.mCT.tpa.TpaSettings;
 import me.jitish.mCT.tpa.TpaStorage;
 import me.jitish.mCT.tpa.commands.*;
+import me.jitish.mCT.warps.WarpCommand;
 import me.jitish.mCT.warps.WarpStore;
 import org.bukkit.plugin.java.JavaPlugin;
 

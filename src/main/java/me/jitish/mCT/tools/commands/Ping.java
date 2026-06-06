@@ -1,6 +1,6 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.commands;
 
-import me.jitish.mCT.listeners.PingDisplayListener;
+import me.jitish.mCT.tools.listeners.PingDisplayListener;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;

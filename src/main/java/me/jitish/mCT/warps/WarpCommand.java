@@ -1,7 +1,5 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.warps;
 
-import me.jitish.mCT.warps.WarpPoint;
-import me.jitish.mCT.warps.WarpStore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

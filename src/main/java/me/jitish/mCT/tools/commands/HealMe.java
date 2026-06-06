@@ -1,4 +1,4 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,21 +11,21 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedMe implements CommandExecutor, TabCompleter {
-    private void feedPlayer(Player p) {
-        p.setFoodLevel(20);
-        p.sendMessage(ChatColor.YELLOW + "Your food level set to max!");
+public class HealMe implements CommandExecutor, TabCompleter {
+    private void healPlayer(Player p) {
+        p.setHealth(20);
+        p.sendMessage(ChatColor.GREEN + "Your health level set to max!");
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("all")) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                this.feedPlayer(player);
+                this.healPlayer(player);
             }
 
             if (sender instanceof Player p) {
-                p.sendMessage(ChatColor.YELLOW + "You maxed all players food level on the server!");
+                p.sendMessage(ChatColor.GREEN + "You healed all players on the server!");
             }
             return true;
         }
@@ -34,13 +34,13 @@ public class FeedMe implements CommandExecutor, TabCompleter {
             for (String playerName : args) {
                 try {
                     Player target = Bukkit.getServer().getPlayerExact(playerName);
-                    this.feedPlayer(target);
+                    this.healPlayer(target);
                 } catch (Exception NullPointerException) {
                     sender.sendMessage(ChatColor.RED + playerName + ChatColor.WHITE + " is not online.");
                 }
             }
         } else if (sender instanceof Player p) {
-            this.feedPlayer(p);
+            this.healPlayer(p);
         } else {
             System.out.println("Something unexpected happened.");
         }

@@ -1,6 +1,6 @@
-package me.jitish.mCT.commands;
+package me.jitish.mCT.tools.commands;
 
-import me.jitish.mCT.listeners.AfkListener;
+import me.jitish.mCT.tools.listeners.AfkListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

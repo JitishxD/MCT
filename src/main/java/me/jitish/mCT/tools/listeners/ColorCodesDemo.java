@@ -1,4 +1,4 @@
-package me.jitish.mCT.listeners;
+package me.jitish.mCT.tools.listeners;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
