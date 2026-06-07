@@ -46,7 +46,7 @@ public class WarpStore {
 
             String name = warpSection.getString("name", key);
             String ownerIdText = warpSection.getString("owner-id");
-            Location location = warpSection.getLocation("location");
+            Location location = (Location) warpSection.get("location");
             if (ownerIdText == null || location == null || location.getWorld() == null) {
                 plugin.getLogger().warning("Skipping invalid " + label + ": " + key);
                 continue;

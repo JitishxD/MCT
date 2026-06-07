@@ -1,8 +1,6 @@
 package me.jitish.mCT.tools.listeners;
 
 import me.jitish.mCT.MCT;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -77,7 +75,7 @@ public class PingDisplayListener implements Listener {
             disable(player);
             return;
         }
-        int ping = player.getPing();
+        int ping = MCT.getPluginInstanceVar().versionHandler.getPlayerPing(player);
         ChatColor color;
         String display;
         if (ping <= 0) {
@@ -93,9 +91,6 @@ public class PingDisplayListener implements Listener {
             color = ChatColor.RED;
             display = ping + " ms";
         }
-        player.spigot().sendMessage(
-                ChatMessageType.ACTION_BAR,
-                new TextComponent(color + "Ping: " + display)
-        );
+        MCT.getPluginInstanceVar().versionHandler.sendActionBar(player, color + "Ping: " + display);
     }
 }

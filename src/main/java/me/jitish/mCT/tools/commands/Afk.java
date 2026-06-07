@@ -21,10 +21,11 @@ public class Afk implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player p)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can run this command.");
             return true;
         }
+        Player p = (Player) sender;
 
         if (!p.hasPermission("MCT.afk")) {
             p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));

@@ -1,7 +1,7 @@
 name: MCT
 version: '${version}'
 main: me.jitish.mCT.MCT
-api-version: '26.1.2'
+api-version: 1.13
 authors: [ Jitish ]
 commands:
   die:

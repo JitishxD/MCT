@@ -27,14 +27,16 @@ public class Fly implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player p) {
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
             if (!p.hasPermission("MCT.fly")) {
                 p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));
                 return true;
             }
         }
 
-        if (sender instanceof Player p) {
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
             if (args.length == 1 && args[0].equalsIgnoreCase("all") && p.hasPermission("MCT.fly.toOtherPlayers")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     this.toggleFlying(player);

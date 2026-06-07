@@ -1,9 +1,6 @@
 package me.jitish.mCT.tpa;
 
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+// Modern chat imports removed for 1.7 compatibility
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -16,7 +13,12 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
+import me.jitish.mCT.MCT;
+import me.jitish.mCT.tools.compatibility.VersionHandler;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,11 +34,19 @@ public class TpaManager {
         TPA, TPA_HERE, TPA_HERE_ALL
     }
 
-    private static final Set<Material> DANGEROUS_BLOCKS = Set.of(
-            Material.LAVA, Material.FIRE, Material.CACTUS, Material.MAGMA_BLOCK,
-            Material.SWEET_BERRY_BUSH, Material.CAMPFIRE, Material.SOUL_CAMPFIRE,
-            Material.POWDER_SNOW
-    );
+    private static final Set<Material> DANGEROUS_BLOCKS = new java.util.HashSet<>();
+    
+    static {
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("LAVA")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("STATIONARY_LAVA")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("FIRE")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("CACTUS")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("MAGMA_BLOCK")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("SWEET_BERRY_BUSH")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("CAMPFIRE")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("SOUL_CAMPFIRE")); } catch (Throwable t) {}
+        try { DANGEROUS_BLOCKS.add(Material.valueOf("POWDER_SNOW")); } catch (Throwable t) {}
+    }
 
     private final JavaPlugin plugin;
     private final TpaStorage storage;
@@ -117,6 +127,14 @@ public class TpaManager {
      * Returns true if sent successfully, false if a duplicate request exists.
      */
     public boolean sendTpaRequest(Player sender, Player receiver) {
+        if (storage.tpaAuto.contains(receiver.getUniqueId())) {
+            sendPrefixed(sender, ChatColor.GREEN + receiver.getName() + " has auto-accept enabled. Teleporting...");
+            sendPrefixed(receiver, ChatColor.GREEN + sender.getName() + "'s request was auto-accepted.");
+            storage.tpaRequests.put(receiver.getUniqueId(), sender.getUniqueId());
+            acceptRequest(receiver);
+            return true;
+        }
+
         // Check for existing request from this sender to this receiver
         UUID existing = storage.tpaRequests.get(receiver.getUniqueId());
         if (existing != null && existing.equals(sender.getUniqueId())) {
@@ -134,6 +152,14 @@ public class TpaManager {
      * Send a /tpahere request (sender wants receiver to teleport TO sender).
      */
     public boolean sendTpaHereRequest(Player sender, Player receiver) {
+        if (storage.tpaAuto.contains(receiver.getUniqueId())) {
+            sendPrefixed(sender, ChatColor.GREEN + receiver.getName() + " has auto-accept enabled. Teleporting...");
+            sendPrefixed(receiver, ChatColor.GREEN + sender.getName() + "'s request was auto-accepted.");
+            storage.tpaHereRequests.put(receiver.getUniqueId(), sender.getUniqueId());
+            acceptRequest(receiver);
+            return true;
+        }
+
         UUID existing = storage.tpaHereRequests.get(receiver.getUniqueId());
         if (existing != null && existing.equals(sender.getUniqueId())) {
             sendPrefixed(sender, ChatColor.RED + "You already have a pending request to " + receiver.getName() + ".");
@@ -150,6 +176,14 @@ public class TpaManager {
      * Send a /tpahereall request to a single player.
      */
     public boolean sendTpaHereAllRequest(Player sender, Player receiver) {
+        if (storage.tpaAuto.contains(receiver.getUniqueId())) {
+            sendPrefixed(sender, ChatColor.GREEN + receiver.getName() + " has auto-accept enabled. Teleporting...");
+            sendPrefixed(receiver, ChatColor.GREEN + sender.getName() + "'s request was auto-accepted.");
+            storage.tpaHereAllRequests.put(receiver.getUniqueId(), sender.getUniqueId());
+            acceptRequest(receiver);
+            return true;
+        }
+
         storage.tpaHereAllRequests.put(receiver.getUniqueId(), sender.getUniqueId());
         sendRequestMessages(sender, receiver, "tpahere");
         scheduleTimeout(receiver.getUniqueId(), RequestType.TPA_HERE_ALL);
@@ -173,8 +207,10 @@ public class TpaManager {
 
         // Play sound
         if (settings.isSoundsEnabled()) {
-            receiver.playSound(receiver.getLocation(), settings.getSound(),
-                    settings.getSoundVolume(), settings.getSoundPitch());
+            VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+            if (vh != null) {
+                vh.sendSound(receiver, settings.getSound(), settings.getSoundVolume(), settings.getSoundPitch());
+            }
         }
 
         sendPrefixed(receiver, receivedMsg);
@@ -194,21 +230,12 @@ public class TpaManager {
     // ── Clickable buttons ────────────────────────────────────────
 
     private void sendClickableButtons(Player receiver) {
-        TextComponent accept = new TextComponent(" [ACCEPT] ");
-        accept.setColor(net.md_5.bungee.api.ChatColor.GREEN);
-        accept.setBold(true);
-        accept.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept"));
-        accept.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to accept")));
-
-        TextComponent separator = new TextComponent("  ");
-
-        TextComponent deny = new TextComponent("[DENY] ");
-        deny.setColor(net.md_5.bungee.api.ChatColor.RED);
-        deny.setBold(true);
-        deny.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny"));
-        deny.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to deny")));
-
-        receiver.spigot().sendMessage(accept, separator, deny);
+        VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+        if (vh != null) {
+            vh.sendTpaRequestButtons(receiver, "");
+        } else {
+            sendPrefixed(receiver, ChatColor.GRAY + "Type " + ChatColor.GREEN + "/tpaccept" + ChatColor.GRAY + " or " + ChatColor.RED + "/tpdeny");
+        }
     }
 
     // ── Request accepting ────────────────────────────────────────
@@ -371,11 +398,12 @@ public class TpaManager {
     }
 
     private Map<UUID, UUID> getRequestMap(RequestType type) {
-        return switch (type) {
-            case TPA -> storage.tpaRequests;
-            case TPA_HERE -> storage.tpaHereRequests;
-            case TPA_HERE_ALL -> storage.tpaHereAllRequests;
-        };
+        switch (type) {
+            case TPA: return storage.tpaRequests;
+            case TPA_HERE: return storage.tpaHereRequests;
+            case TPA_HERE_ALL: return storage.tpaHereAllRequests;
+            default: return null;
+        }
     }
 
     // ── Delayed teleport ─────────────────────────────────────────
@@ -441,12 +469,14 @@ public class TpaManager {
 
         // Set invincibility
         if (settings.isInvincibilityEnabled()) {
-            teleporting.setInvulnerable(true);
+            VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+            if (vh != null) vh.setInvulnerable(teleporting, true);
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (teleporting.isOnline()) {
-                        teleporting.setInvulnerable(false);
+                        VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+                        if (vh != null) vh.setInvulnerable(teleporting, false);
                     }
                 }
             }.runTaskLater(plugin, settings.getInvincibilityDuration() * 20L);
@@ -454,10 +484,11 @@ public class TpaManager {
 
         sendPrefixed(teleporting, ChatColor.GREEN + "Teleported!");
     }
-
     private void spawnParticles(Player player) {
-        player.getWorld().spawnParticle(settings.getParticle(),
-                player.getLocation().add(0, 1, 0), 40, 0.5, 0.5, 0.5, 0);
+        VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+        if (vh != null) {
+            vh.spawnParticle(player, settings.getParticle());
+        }
     }
 
     // ── Back command ─────────────────────────────────────────────
@@ -559,7 +590,7 @@ public class TpaManager {
         int baseX = target.getBlockX();
         int baseY = target.getBlockY();
         int baseZ = target.getBlockZ();
-        int minY = world.getMinHeight();
+        int minY = MCT.getPluginInstanceVar().versionHandler.getMinHeight(world);
         int maxY = world.getMaxHeight();
 
         // Check directly above/below first

@@ -19,7 +19,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
             p.removePotionEffect(PotionEffectType.NIGHT_VISION);
             p.sendMessage(ChatColor.RED + "Night vision disabled.");
         } else {
-            p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
             p.sendMessage(ChatColor.GREEN + "Night vision enabled.");
         }
     }
@@ -30,7 +30,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
             target.sendMessage(ChatColor.RED + "Night vision disabled.");
             sender.sendMessage("You have disabled night vision for " + ChatColor.RED + target.getDisplayName());
         } else {
-            target.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, true));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
             target.sendMessage(ChatColor.GREEN + "Night vision enabled.");
             sender.sendMessage("You have enabled night vision for " + ChatColor.GREEN + target.getDisplayName());
         }
@@ -38,7 +38,8 @@ public class NightVision implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player p) {
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
             if (args.length == 1 && args[0].equalsIgnoreCase("all")) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     this.toggleNightVision(player);
@@ -48,13 +49,13 @@ public class NightVision implements CommandExecutor, TabCompleter {
             } else if (args.length == 2 && args[0].equalsIgnoreCase("all")) {
                 if (args[1].equalsIgnoreCase("on")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, true));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
                         player.sendMessage(ChatColor.GREEN + "nightvision enabled!");
                     }
                     p.sendMessage(ChatColor.GREEN + "You turned on nightvision for all players on the server!");
                 } else if (args[1].equalsIgnoreCase("off")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, true));
+                        player.removePotionEffect(PotionEffectType.NIGHT_VISION);
                         player.sendMessage(ChatColor.RED + "nightvision disabled!");
                     }
                     p.sendMessage(ChatColor.RED + "You turned off nightvisoin for all players on the server!");

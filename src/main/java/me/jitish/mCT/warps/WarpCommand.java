@@ -78,10 +78,11 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     }
 
     private void createWarp(CommandSender sender, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can create " + settings.warpLabelPlural + " because a location is needed.");
             return;
         }
+        Player player = (Player) sender;
 
         if (!player.hasPermission(settings.createPermission)) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -127,12 +128,13 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (settings.ownerCanRemove
-                && sender instanceof Player player
-                && !player.getUniqueId().equals(warp.getOwnerId())
-                && !player.hasPermission(settings.adminPermission)) {
-            player.sendMessage(ChatColor.RED + "You can only remove your own " + settings.warpLabelPlural + ".");
-            return;
+        if (settings.ownerCanRemove && sender instanceof Player) {
+            Player player = (Player) sender;
+            if (!player.getUniqueId().equals(warp.getOwnerId())
+                    && !player.hasPermission(settings.adminPermission)) {
+                player.sendMessage(ChatColor.RED + "You can only remove your own " + settings.warpLabelPlural + ".");
+                return;
+            }
         }
 
         store.remove(args[1]);
@@ -281,7 +283,8 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         if (sender.hasPermission(settings.adminPermission)) {
             return true;
         }
-        if (sender instanceof Player player) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
             return player.getUniqueId().equals(warp.getOwnerId());
         }
         return true; // console can always manage
@@ -387,7 +390,8 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             // Access indicator (only for private warps)
             if (warp.isPrivate()) {
                 boolean hasAccess = true;
-                if (sender instanceof Player player) {
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
                     hasAccess = warp.canAccess(player.getUniqueId())
                             || player.hasPermission(settings.adminPermission);
                 }
@@ -455,10 +459,11 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     }
 
     private void teleportToWarp(CommandSender sender, String warpName) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can teleport to " + settings.warpLabelPlural + ".");
             return;
         }
+        Player player = (Player) sender;
 
         WarpPoint warp = store.get(warpName).orElse(null);
         if (warp == null) {
@@ -548,8 +553,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args.length == 2 && isWarpNameSubCommand(args[0])) {
             // For go/info: only show accessible warps (hides private warps from tab-complete)
-            if (sender instanceof Player player
+            if (sender instanceof Player
                     && (args[0].equalsIgnoreCase("go") || args[0].equalsIgnoreCase("info"))) {
+                Player player = (Player) sender;
                 options.addAll(store.accessibleNames(player.getUniqueId()));
             } else {
                 // For delete/private/allow/deny/allowed: show all warps (owner/admin needs to see them)

@@ -37,10 +37,11 @@ public class SetHealth implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player executor)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "This command can only be used by players.");
             return true;
         }
+        Player executor = (Player) sender;
 
         if (!executor.hasPermission("MCT.setHealth")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));

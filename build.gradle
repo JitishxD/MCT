@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'me.jitish'
-version = '1.0.0-26.1'
+version = '1.1.0'
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ jar {
     destinationDirectory.set(file("E:\\Minecraft Projects\\servers\\spigot-26.1.2-test-server\\plugins"))
 }
 
-def targetJavaVersion = 25
+def targetJavaVersion = 8
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion

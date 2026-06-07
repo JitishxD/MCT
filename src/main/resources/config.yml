@@ -60,6 +60,9 @@ tpa:
     request-sent: "&7Teleport request sent to &e%player%&7."
     request-received: "&e%player% &7sent you a teleport request."
 
+# ═══════════════════════════════════════════════════════════════════
+#                        Stored Warps
+# ═══════════════════════════════════════════════════════════════════
 # Player warps are saved here automatically by /pwarp.
 player-warps:
   warps: {}

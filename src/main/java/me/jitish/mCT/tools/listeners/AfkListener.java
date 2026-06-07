@@ -3,9 +3,9 @@ package me.jitish.mCT.tools.listeners;
 import me.jitish.mCT.MCT;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Display;
+
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -16,49 +16,61 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Manages AFK state for players.
- * When a player goes AFK (manually or after being idle), a TextDisplay hologram
- * reading "⏸ AFK" is spawned and mounted as a passenger on the player so it
- * floats above their head.
- * Moving, chatting, interacting, or running a command resets the idle timer
- * and automatically takes the player out of AFK.
- */
 public class AfkListener implements Listener {
 
-    private final Map<UUID, TextDisplay> afkDisplays = new HashMap<>();
+    private final Map<UUID, ArmorStand> afkDisplays = new HashMap<>();
     private final Map<UUID, Long> lastActivity = new HashMap<>();
 
-    // Default idle timeout in seconds (can be overridden by config.yml "afk-timeout-seconds")
     private int afkTimeoutSeconds = 300; // 5 minutes
     private int idleCheckTaskId = -1;
+    private int hologramTaskId = -1;
 
-    // yStarts the idle-check scheduler. Should be called from onEnable().
     public void startIdleChecker() {
-        // Read timeout from config (fallback to 300 seconds if not set)
         afkTimeoutSeconds = MCT.getPluginInstanceVar().getConfig().getInt("afk-timeout-seconds", 300);
 
         idleCheckTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
                 MCT.getPluginInstanceVar(),
                 this::checkIdlePlayers,
-                20L * 10, // First check after 10 seconds
-                20L * 5   // Check every 5 seconds
+                20L * 10,
+                20L * 5
+        );
+
+        hologramTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
+                MCT.getPluginInstanceVar(),
+                this::updateHolograms,
+                1L,
+                1L
         );
     }
 
-    // Stops the idle-check scheduler. Should be called from onDisable().
+    private void updateHolograms() {
+        for (Map.Entry<UUID, ArmorStand> entry : afkDisplays.entrySet()) {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null && player.isOnline()) {
+                org.bukkit.Location loc = player.getLocation().clone().add(0, 1.9, 0);
+                entry.getValue().teleport(loc);
+            }
+        }
+    }
+
     public void stopIdleChecker() {
         if (idleCheckTaskId != -1) {
             Bukkit.getScheduler().cancelTask(idleCheckTaskId);
             idleCheckTaskId = -1;
         }
-        // Cleanup all AFK displays
-        for (Map.Entry<UUID, TextDisplay> entry : afkDisplays.entrySet()) {
+        if (hologramTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(hologramTaskId);
+            hologramTaskId = -1;
+        }
+        for (Map.Entry<UUID, ArmorStand> entry : afkDisplays.entrySet()) {
             entry.getValue().remove();
         }
         afkDisplays.clear();
@@ -83,58 +95,46 @@ public class AfkListener implements Listener {
         }
     }
 
-    // Check whether a player is currently marked AFK.
     public boolean isAfk(Player player) {
         return afkDisplays.containsKey(player.getUniqueId());
     }
 
-    // Toggle or set a player's AFK state.
     public void setAfk(Player player, boolean afk) {
         if (afk) {
             enableAfk(player);
         } else {
             disableAfk(player);
         }
-        // Reset activity timer regardless
         lastActivity.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
     private void enableAfk(Player player) {
         UUID uuid = player.getUniqueId();
         if (afkDisplays.containsKey(uuid)) {
-            return; // already AFK
+            return;
         }
 
-        // Spawn a TextDisplay entity at the player's location
-        TextDisplay display = player.getWorld().spawn(player.getLocation(), TextDisplay.class, entity -> {
-            entity.setText(ChatColor.GRAY + "" + ChatColor.BOLD + "⏸ " + ChatColor.YELLOW + "" + ChatColor.BOLD + "AFK");
-            entity.setBillboard(Display.Billboard.CENTER); // Always face the viewer
-            entity.setDefaultBackground(false); // Transparent background
-            entity.setShadowed(true);
-            entity.setPersistent(false); // Don't save to world data
-        });
+        ArmorStand display = player.getWorld().spawn(player.getLocation().add(0, 1.9, 0), ArmorStand.class);
+        display.setCustomName(ChatColor.GRAY + "" + ChatColor.BOLD + "AFK");
+        display.setCustomNameVisible(true);
+        display.setVisible(false);
+        display.setGravity(false);
+        try { display.setMarker(true); } catch (Throwable ignored) {}
 
-        // Mount the TextDisplay on top of the player so it floats above their head
-        player.addPassenger(display);
         afkDisplays.put(uuid, display);
 
-        // Broadcast to the server
         Bukkit.broadcastMessage(ChatColor.GRAY + "* " + player.getDisplayName() + " is now AFK.");
     }
 
     private void disableAfk(Player player) {
         UUID uuid = player.getUniqueId();
-        TextDisplay display = afkDisplays.remove(uuid);
+        ArmorStand display = afkDisplays.remove(uuid);
         if (display != null) {
-            player.removePassenger(display);
             display.remove();
             Bukkit.broadcastMessage(ChatColor.GRAY + "* " + player.getDisplayName() + " is no longer AFK.");
         }
     }
 
-    /**
-     * Resets the idle timer for a player and un-AFKs them if they are AFK.
-     */
     private void markActive(Player player) {
         lastActivity.put(player.getUniqueId(), System.currentTimeMillis());
         if (isAfk(player)) {
@@ -143,17 +143,13 @@ public class AfkListener implements Listener {
         }
     }
 
-    // --- Activity listeners (reset idle timer + auto-unafk) ---
-
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        // Start tracking activity from the moment they join
         lastActivity.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        // Only trigger on actual position change, not just head rotation
         if (event.getFrom().getBlockX() != event.getTo().getBlockX()
                 || event.getFrom().getBlockY() != event.getTo().getBlockY()
                 || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
@@ -162,15 +158,28 @@ public class AfkListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        markActive(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        markActive(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        markActive(event.getEntity());
+    }
+
+    @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        // Schedule on main thread since we need to interact with entities
         Bukkit.getScheduler().runTask(MCT.getPluginInstanceVar(), () -> markActive(player));
     }
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
-        // Don't reset if the player is running /afk (toggle scenario handled by command)
         String msg = event.getMessage().toLowerCase();
         if (msg.startsWith("/afk")) {
             return;
@@ -195,11 +204,10 @@ public class AfkListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // Cleanup on disconnect
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         lastActivity.remove(uuid);
-        TextDisplay display = afkDisplays.remove(uuid);
+        ArmorStand display = afkDisplays.remove(uuid);
         if (display != null) {
             display.remove();
         }

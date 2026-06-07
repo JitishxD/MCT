@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
@@ -18,16 +17,14 @@ import java.util.List;
 
 public class Repair implements CommandExecutor, TabCompleter {
 
+    @SuppressWarnings("deprecation")
     private boolean repairItem(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) {
             return false;
         }
-        if (item.getItemMeta() instanceof Damageable meta) {
-            if (meta.getDamage() > 0) {
-                meta.setDamage(0);
-                item.setItemMeta(meta);
-                return true;
-            }
+        if (item.getType().getMaxDurability() > 0 && item.getDurability() > 0) {
+            item.setDurability((short) 0);
+            return true;
         }
         return false;
     }
@@ -44,25 +41,29 @@ public class Repair implements CommandExecutor, TabCompleter {
                 repairedCount++;
             }
         }
-        if (repairItem(target.getInventory().getItemInOffHand())) {
-            repairedCount++;
-        }
+        try {
+            if (repairItem(target.getInventory().getItemInOffHand())) {
+                repairedCount++;
+            }
+        } catch (NoSuchMethodError ignored) {}
         return repairedCount;
     }
 
     private boolean repairHand(Player target) {
-        ItemStack handItem = target.getInventory().getItemInMainHand();
+        ItemStack handItem = target.getInventory().getItemInHand();
         if (handItem.getType() == Material.AIR) {
             return false;
         }
-        if (!(handItem.getItemMeta() instanceof Damageable)) {
+        @SuppressWarnings("deprecation")
+        boolean damageable = handItem.getType().getMaxDurability() > 0;
+        if (!damageable) {
             return false;
         }
         return repairItem(handItem);
     }
 
     private void repairHand(Player executor, Player target) {
-        if (target.getInventory().getItemInMainHand().getType() == Material.AIR) {
+        if (target.getInventory().getItemInHand().getType() == Material.AIR) {
             if (target.equals(executor)) {
                 executor.sendMessage(ChatColor.RED + "You must hold an item in your main hand!");
             } else {
@@ -71,7 +72,9 @@ public class Repair implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (!(target.getInventory().getItemInMainHand().getItemMeta() instanceof Damageable)) {
+        @SuppressWarnings("deprecation")
+        boolean damageable = target.getInventory().getItemInHand().getType().getMaxDurability() > 0;
+        if (!damageable) {
             if (target.equals(executor)) {
                 executor.sendMessage(ChatColor.RED + "This item cannot be repaired!");
             } else {
@@ -117,10 +120,11 @@ public class Repair implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player executor)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can run this command.");
             return true;
         }
+        Player executor = (Player) sender;
 
         if (!executor.hasPermission("MCT.repair")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4&lYou do not have permission to use this command."));

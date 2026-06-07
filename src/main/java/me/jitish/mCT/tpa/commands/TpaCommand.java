@@ -32,10 +32,11 @@ public class TpaCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can use this command.");
             return true;
         }
+        Player player = (Player) sender;
         if (!player.hasPermission("MCT.tpa")) {
             player.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
             return true;
@@ -95,16 +96,7 @@ public class TpaCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Auto-accept: if target has tpauto on, accept immediately
-        if (storage.tpaAuto.contains(target.getUniqueId())) {
-            manager.sendPrefixed(player, ChatColor.GREEN + target.getName() + " has auto-accept enabled. Teleporting...");
-            manager.sendPrefixed(target, ChatColor.GREEN + player.getName() + "'s request was auto-accepted.");
-            // Store request then immediately accept it
-            storage.tpaRequests.put(target.getUniqueId(), player.getUniqueId());
-            manager.acceptRequest(target);
-            manager.setCooldown(player, storage.tpaCooldowns);
-            return true;
-        }
+
 
         if (manager.sendTpaRequest(player, target)) {
             manager.setCooldown(player, storage.tpaCooldowns);
@@ -114,9 +106,10 @@ public class TpaCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length != 1 || !(sender instanceof Player player)) {
+        if (args.length != 1 || !(sender instanceof Player)) {
             return Collections.emptyList();
         }
+        Player player = (Player) sender;
         List<String> options = new ArrayList<>();
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (!online.equals(player) && !manager.isVanished(online) && player.canSee(online)) {

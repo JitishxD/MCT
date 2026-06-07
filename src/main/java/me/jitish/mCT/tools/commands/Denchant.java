@@ -3,7 +3,6 @@ package me.jitish.mCT.tools.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -63,16 +62,21 @@ public class Denchant implements CommandExecutor, TabCompleter {
         for (ItemStack item : target.getInventory().getArmorContents()) {
             removed += stripEnchantments(item);
         }
-        removed += stripEnchantments(target.getInventory().getItemInOffHand());
+        try {
+            removed += stripEnchantments(target.getInventory().getItemInOffHand());
+        } catch (NoSuchMethodError ignored) {
+            // 1.8.8 doesn't have offhand
+        }
         return removed;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player executor)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can run this command.");
             return true;
         }
+        Player executor = (Player) sender;
 
         if (!executor.hasPermission("MCT.denchant")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -120,7 +124,7 @@ public class Denchant implements CommandExecutor, TabCompleter {
 
         // --- /denchant <player>  →  strip all enchantments from held item ---
         if (args.length == 1) {
-            ItemStack item = target.getInventory().getItemInMainHand();
+            ItemStack item = target.getInventory().getItemInHand();
             if (item.getType() == Material.AIR) {
                 sendNoItemMessage(executor, target);
                 return true;
@@ -177,29 +181,20 @@ public class Denchant implements CommandExecutor, TabCompleter {
         }
 
         // --- /denchant <player> <enchantment>  →  strip specific enchantment from held item ---
-        String enchantArg = args[1].toLowerCase();
-        if (enchantArg.startsWith("minecraft:")) {
-            enchantArg = enchantArg.substring("minecraft:".length());
-        }
-        Enchantment enchantment;
-        try {
-            enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantArg));
-        } catch (IllegalArgumentException e) {
-            enchantment = null;
-        }
+        Enchantment enchantment = EnchantHelper.resolveEnchantment(args[1]);
         if (enchantment == null) {
             executor.sendMessage(ChatColor.RED + "Unknown enchantment: " + ChatColor.YELLOW + args[1]);
-            executor.sendMessage(ChatColor.GRAY + "Use the minecraft key name (e.g. sharpness, efficiency, protection).");
+            executor.sendMessage(ChatColor.GRAY + "Use the vanilla name (e.g. sharpness) or bukkit name (e.g. DAMAGE_ALL).");
             return true;
         }
 
-        ItemStack item = target.getInventory().getItemInMainHand();
+        ItemStack item = target.getInventory().getItemInHand();
         if (item.getType() == Material.AIR) {
             sendNoItemMessage(executor, target);
             return true;
         }
 
-        String enchantName = formatEnchantmentName(enchantment);
+        String enchantName = EnchantHelper.formatEnchantmentName(enchantment);
 
         if (stripEnchantment(item, enchantment)) {
             if (target.equals(executor)) {
@@ -229,7 +224,8 @@ public class Denchant implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             // Arg 1: player names + "all"
             List<String> playerNames = new ArrayList<>();
-            if (sender instanceof Player executor) {
+            if (sender instanceof Player) {
+                Player executor = (Player) sender;
                 playerNames.add(executor.getName());
             }
             if (sender.hasPermission("MCT.denchant.toOtherPlayers")) {
@@ -243,15 +239,12 @@ public class Denchant implements CommandExecutor, TabCompleter {
             StringUtil.copyPartialMatches(args[0], playerNames, completions);
 
         } else if (args.length == 2) {
-            // Arg 2: enchantment names + "all"
-            List<String> options = new ArrayList<>();
+            // Arg 2: enchantment names (minecraft keys) + "all"
+            List<String> enchantNames = EnchantHelper.getEnchantmentNames();
             if (sender.hasPermission("MCT.denchant.all")) {
-                options.add("all");
+                enchantNames.add("all");
             }
-            for (Enchantment enchantment : Enchantment.values()) {
-                options.add(enchantment.getKey().getKey());
-            }
-            StringUtil.copyPartialMatches(args[1], options, completions);
+            StringUtil.copyPartialMatches(args[1], enchantNames, completions);
         }
 
         Collections.sort(completions);
@@ -267,7 +260,7 @@ public class Denchant implements CommandExecutor, TabCompleter {
             int totalRemoved = 0;
             int count = 0;
             for (Player target : Bukkit.getOnlinePlayers()) {
-                ItemStack item = target.getInventory().getItemInMainHand();
+                ItemStack item = target.getInventory().getItemInHand();
                 int removed = stripEnchantments(item);
                 if (removed > 0) {
                     count++;
@@ -303,26 +296,17 @@ public class Denchant implements CommandExecutor, TabCompleter {
         }
 
         // /denchant all <enchantment> → strip specific enchant from held items of all players
-        String enchantArg = args[1].toLowerCase();
-        if (enchantArg.startsWith("minecraft:")) {
-            enchantArg = enchantArg.substring("minecraft:".length());
-        }
-        Enchantment enchantment;
-        try {
-            enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantArg));
-        } catch (IllegalArgumentException e) {
-            enchantment = null;
-        }
+        Enchantment enchantment = EnchantHelper.resolveEnchantment(args[1]);
         if (enchantment == null) {
             executor.sendMessage(ChatColor.RED + "Unknown enchantment: " + ChatColor.YELLOW + args[1]);
-            executor.sendMessage(ChatColor.GRAY + "Use the minecraft key name (e.g. sharpness, efficiency, protection).");
+            executor.sendMessage(ChatColor.GRAY + "Use the vanilla name (e.g. sharpness) or bukkit name (e.g. DAMAGE_ALL).");
             return;
         }
 
-        String enchantName = formatEnchantmentName(enchantment);
+        String enchantName = EnchantHelper.formatEnchantmentName(enchantment);
         int count = 0;
         for (Player target : Bukkit.getOnlinePlayers()) {
-            ItemStack item = target.getInventory().getItemInMainHand();
+            ItemStack item = target.getInventory().getItemInHand();
             if (stripEnchantment(item, enchantment)) {
                 count++;
                 if (!target.equals(executor)) {
@@ -340,22 +324,5 @@ public class Denchant implements CommandExecutor, TabCompleter {
         } else {
             executor.sendMessage(ChatColor.RED + target.getName() + " is not holding any item!");
         }
-    }
-
-    /**
-     * Formats an enchantment key into a readable name.
-     * e.g. "sharpness" -> "Sharpness", "fire_aspect" -> "Fire Aspect"
-     */
-    private String formatEnchantmentName(Enchantment enchantment) {
-        String key = enchantment.getKey().getKey();
-        String[] parts = key.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (!sb.isEmpty()) {
-                sb.append(" ");
-            }
-            sb.append(part.substring(0, 1).toUpperCase()).append(part.substring(1));
-        }
-        return sb.toString();
     }
 }

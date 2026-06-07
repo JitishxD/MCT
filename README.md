@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Minecraft-26.1.2-62B47A?style=for-the-badge&logo=minecraft&logoColor=white" alt="Minecraft Version"/>
-  <img src="https://img.shields.io/badge/Spigot_API-26.1.2--R0.1-F7931A?style=for-the-badge&logo=spigotmc&logoColor=white" alt="Spigot API"/>
-  <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java Version"/>
+  <img src="https://img.shields.io/badge/Minecraft-1.7--Latest-62B47A?style=for-the-badge&logo=minecraft&logoColor=white" alt="Minecraft Version"/>
+  <img src="https://img.shields.io/badge/Spigot_API-1.13-F7931A?style=for-the-badge&logo=spigotmc&logoColor=white" alt="Spigot API"/>
+  <img src="https://img.shields.io/badge/Java-8-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java Version"/>
   <img src="https://img.shields.io/badge/Gradle-9.5.1-02303A?style=for-the-badge&logo=gradle&logoColor=white" alt="Gradle Version"/>
 </p>
 
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0--26.1-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -95,7 +95,7 @@
 | `/back` | — | Teleport to your previous location | `/back [player]` |
 | `/tpatoggle` | — | Toggle receiving TPA requests on/off | `/tpatoggle [player]` |
 | `/tpaignore` | `/tpignore`, `/tpblock`, `/tpablock` | Ignore a player's TPA requests (toggle) | `/tpaignore <player>` |
-| `/tpauto` | — | Toggle auto-accepting incoming /tpa requests | `/tpauto` |
+| `/tpauto` | — | Toggle auto-accepting incoming /tpa requests | `/tpauto [on \| off \| check \| status]` |
 | `/tpahereall` | — | Send teleport-here request to all online players | `/tpahereall` |
 
 > **Tip:** Commands that support `all` will apply the action to every online player. You can also list multiple player names separated by spaces.
@@ -186,7 +186,7 @@
 ## 🏗️ Building from Source
 
 **Prerequisites:**
-- Java 21 or higher
+- Java 8 or higher
 - Git
 
 ```bash
@@ -231,6 +231,10 @@ MCT/
 │   │   │   │   ├── AfkListener.java          # AFK idle tracking
 │   │   │   │   ├── ColorCodesDemo.java       # Join message formatting
 │   │   │   │   └── PingDisplayListener.java  # Action bar ping display
+│   │   │   ├── compatibility/                # Cross-version handlers
+│   │   │   │   ├── VersionHandler.java       # Interface for modern features
+│   │   │   │   ├── ModernFeaturesHandler.java # 1.13+ implementation
+│   │   │   │   └── LegacyFeaturesHandler.java # 1.12- implementation
 │   │   │   └── spawn/                        # Spawn system
 │   │   │       ├── SetSpawn.java             # /setspawn command
 │   │   │       ├── Spawn.java                # /spawn command
@@ -269,8 +273,8 @@ MCT/
 
 | Component | Technology | Version |
 |:----------|:-----------|:--------|
-| Language | Java | 21 |
-| Server API | Spigot API | 26.1.2-R0.1-SNAPSHOT |
+| Language | Java | 8 |
+| Server API | Spigot API | 1.13 |
 | Build Tool | Gradle | 9.5.1 |
 
 
@@ -280,9 +284,22 @@ MCT/
 
 | Minecraft Version | Supported | Notes |
 |:-------------------|:---------:|:------|
-| 26.1.2 | ✅ | Current target version |
-| 26.1.x | ✅ | Should work on all 26.1 patches |
-| < 26.1 | ❌ | Not supported (`api-version: 26.1.2`) |
+| 1.13 - Latest | ✅ | Full feature support (Particles, clickable chat, sounds, etc) |
+| 1.7 - 1.12 | ✅ | Core functionality works. Modern features fail gracefully via VersionHandler |
+
+---
+
+## ⚙️ Version Handling Architecture
+
+MCT is designed to run seamlessly on virtually any Spigot version from **1.7 to the latest release** without requiring multiple different jars. This is achieved through a smart, reflection-based multi-version strategy:
+
+1. **Base API Downgrade:** The plugin is compiled against Java 8 and the Spigot 1.13 API. This serves as a "middle-ground" that prevents `UnsupportedClassVersionError` on older servers while maintaining access to most modern Bukkit methods.
+2. **Dynamic Version Detection:** On startup, the plugin parses the server's version string (e.g., `v1_8_R3`, `v1_21_R1`).
+3. **The `VersionHandler` Interface:** Modern features that don't exist in older versions (like clickable TextComponents, action bar messages, or specific sound enums) are abstracted behind a `VersionHandler` interface.
+4. **Fallback Implementations:** 
+   - If the server is 1.13+, it loads `ModernFeaturesHandler` which utilizes the modern API natively.
+   - If the server is older (e.g., 1.8.8), it loads `LegacyFeaturesHandler` or gracefully catches missing methods (`NoSuchMethodError`) and falls back to traditional alternatives (e.g., sending standard chat messages instead of clickable text).
+5. **Reflection:** For deeply ingrained breaking changes (like `ItemMeta.Damageable` in 1.13+ vs `item.setDurability()` in 1.8), MCT heavily utilizes Java Reflection to determine available methods at runtime and cast appropriately, ensuring the exact same code executes correctly regardless of the underlying server software.
 
 ---
 
@@ -290,6 +307,7 @@ MCT/
 
 | Version | MC Version | Highlights                                                                                                  |
 |:--------|:-----------|:------------------------------------------------------------------------------------------------------------|
+| `1.1.0` | 1.7-Latest | Downgraded to Java 8, added `VersionHandler` to gracefully support Minecraft 1.7 through the latest release, improved `/tpauto`, fixed enchant autocomplete, and patched 1.8.8 bugs (AFK holograms, Sounds) |
 | `1.0.0-26.1` | 26.1       | Release V1! restructured into feature-based packages (tools/, tpa/, warps/)                                 |
 | `0.0.9-26.1.2` | 26.1.2     | Integrated SimpleTpa: /tpa, /tpahere, /tpaccept, /tpdeny, /tpcancel, /back, /tpatoggle, /tpaignore, /tpauto, /tpahereall with full config |
 | `0.0.8-26.1.2` | 26.1.2     | Private warps with per-player access control; compact inline warp list; player name filter for list command |

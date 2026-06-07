@@ -34,7 +34,7 @@ public class Summonn implements CommandExecutor, TabCompleter {
         // Add all vanilla spawnable entities
         for (EntityType type : EntityType.values()) {
             if (type.isSpawnable() && type != EntityType.PLAYER) {
-                names.add(type.getKey().getKey());
+                names.add(type.name().toLowerCase());
             }
         }
         Collections.sort(names);
@@ -46,11 +46,11 @@ public class Summonn implements CommandExecutor, TabCompleter {
      * e.g. "zombie_villager" -> "Zombie Villager"
      */
     private String formatEntityName(EntityType type) {
-        String key = type.getKey().getKey();
+        String key = type.name().toLowerCase();
         String[] parts = key.split("_");
         StringBuilder sb = new StringBuilder();
         for (String part : parts) {
-            if (!sb.isEmpty()) {
+            if (sb.length() == 0) {
                 sb.append(" ");
             }
             sb.append(part.substring(0, 1).toUpperCase()).append(part.substring(1));
@@ -78,10 +78,11 @@ public class Summonn implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player executor)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can run this command.");
             return true;
         }
+        Player executor = (Player) sender;
 
         if (!executor.hasPermission("MCT.summonn")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -114,7 +115,7 @@ public class Summonn implements CommandExecutor, TabCompleter {
         } else {
             for (EntityType type : EntityType.values()) {
                 if (type.isSpawnable() && type != EntityType.PLAYER
-                        && type.getKey().getKey().equalsIgnoreCase(entityArg)) {
+                        && type.name().equalsIgnoreCase(entityArg)) {
                     entityType = type;
                     break;
                 }
@@ -216,7 +217,7 @@ public class Summonn implements CommandExecutor, TabCompleter {
 
         } else if (args.length == 2) {
             // Arg 2: amount suggestions
-            List<String> amounts = List.of("1", "2", "5", "10", "25", "50", "100");
+            List<String> amounts = java.util.Arrays.asList("1", "2", "5", "10", "25", "50", "100");
             StringUtil.copyPartialMatches(args[1], amounts, completions);
 
         } else if (args.length == 3) {

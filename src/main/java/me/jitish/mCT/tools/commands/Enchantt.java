@@ -3,7 +3,6 @@ package me.jitish.mCT.tools.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,10 +22,11 @@ public class Enchantt implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player executor)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can run this command.");
             return true;
         }
+        Player executor = (Player) sender;
 
         if (!executor.hasPermission("MCT.enchantt")) {
             executor.sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -41,20 +41,10 @@ public class Enchantt implements CommandExecutor, TabCompleter {
         }
 
         // --- Resolve enchantment first (shared for single & all) ---
-        String enchantArg = args[1].toLowerCase();
-        // Strip "minecraft:" prefix if the player typed it (vanilla autocomplete uses this format)
-        if (enchantArg.startsWith("minecraft:")) {
-            enchantArg = enchantArg.substring("minecraft:".length());
-        }
-        Enchantment enchantment;
-        try {
-            enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantArg));
-        } catch (IllegalArgumentException e) {
-            enchantment = null;
-        }
+        Enchantment enchantment = EnchantHelper.resolveEnchantment(args[1]);
         if (enchantment == null) {
             executor.sendMessage(ChatColor.RED + "Unknown enchantment: " + ChatColor.YELLOW + args[1]);
-            executor.sendMessage(ChatColor.GRAY + "Use the minecraft key name (e.g. sharpness, efficiency, protection).");
+            executor.sendMessage(ChatColor.GRAY + "Use the vanilla name (e.g. sharpness) or bukkit name (e.g. DAMAGE_ALL).");
             return true;
         }
 
@@ -72,7 +62,7 @@ public class Enchantt implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String enchantName = formatEnchantmentName(enchantment);
+        String enchantName = EnchantHelper.formatEnchantmentName(enchantment);
         String playerArg = args[0];
 
         // --- Handle "all" target ---
@@ -86,7 +76,7 @@ public class Enchantt implements CommandExecutor, TabCompleter {
             int count = 0;
             int skipped = 0;
             for (Player target : Bukkit.getOnlinePlayers()) {
-                ItemStack item = target.getInventory().getItemInMainHand();
+                ItemStack item = target.getInventory().getItemInHand();
                 if (item.getType() == Material.AIR) {
                     skipped++;
                     continue;
@@ -119,7 +109,7 @@ public class Enchantt implements CommandExecutor, TabCompleter {
         }
 
         // --- Validate held item ---
-        ItemStack item = target.getInventory().getItemInMainHand();
+        ItemStack item = target.getInventory().getItemInHand();
         if (item.getType() == Material.AIR) {
             if (target.equals(executor)) {
                 executor.sendMessage(ChatColor.RED + "You must hold an item in your main hand!");
@@ -152,7 +142,8 @@ public class Enchantt implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             // Arg 1: player names + "all"
             List<String> playerNames = new ArrayList<>();
-            if (sender instanceof Player executor) {
+            if (sender instanceof Player) {
+                Player executor = (Player) sender;
                 playerNames.add(executor.getName());
             }
             if (sender.hasPermission("MCT.enchantt.toOtherPlayers")) {
@@ -167,36 +158,16 @@ public class Enchantt implements CommandExecutor, TabCompleter {
 
         } else if (args.length == 2) {
             // Arg 2: enchantment names (minecraft keys)
-            List<String> enchantNames = new ArrayList<>();
-            for (Enchantment enchantment : Enchantment.values()) {
-                enchantNames.add(enchantment.getKey().getKey());
-            }
+            List<String> enchantNames = EnchantHelper.getEnchantmentNames();
             StringUtil.copyPartialMatches(args[1], enchantNames, completions);
 
         } else if (args.length == 3) {
             // Arg 3: level suggestions
-            List<String> levels = List.of("1", "5", "10", "50", "100", "255");
+            List<String> levels = java.util.Arrays.asList("1", "5", "10", "50", "100", "255");
             StringUtil.copyPartialMatches(args[2], levels, completions);
         }
 
         Collections.sort(completions);
         return completions;
-    }
-
-    /**
-     * Formats an enchantment key into a readable name.
-     * e.g. "sharpness" -> "Sharpness", "fire_aspect" -> "Fire Aspect"
-     */
-    private String formatEnchantmentName(Enchantment enchantment) {
-        String key = enchantment.getKey().getKey();
-        String[] parts = key.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (!sb.isEmpty()) {
-                sb.append(" ");
-            }
-            sb.append(part.substring(0, 1).toUpperCase()).append(part.substring(1));
-        }
-        return sb.toString();
     }
 }

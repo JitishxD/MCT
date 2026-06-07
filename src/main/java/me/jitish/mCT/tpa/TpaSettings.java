@@ -1,8 +1,6 @@
 package me.jitish.mCT.tpa;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -118,13 +116,8 @@ public class TpaSettings {
 
     // ── Sound & Particles ────────────────────────────────────────
 
-    public Sound getSound() {
-        String name = plugin.getConfig().getString("tpa.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
-        try {
-            return Sound.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            return Sound.ENTITY_EXPERIENCE_ORB_PICKUP;
-        }
+    public String getSound() {
+        return plugin.getConfig().getString("tpa.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
     }
 
     public float getSoundVolume() {
@@ -135,13 +128,8 @@ public class TpaSettings {
         return (float) plugin.getConfig().getDouble("tpa.sound-pitch", 0.533);
     }
 
-    public Particle getParticle() {
-        String name = plugin.getConfig().getString("tpa.particle", "POOF");
-        try {
-            return Particle.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            return Particle.POOF;
-        }
+    public String getParticle() {
+        return plugin.getConfig().getString("tpa.particle", "POOF");
     }
 
     // ── Disabled worlds ──────────────────────────────────────────

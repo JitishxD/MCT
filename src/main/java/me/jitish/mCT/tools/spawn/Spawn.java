@@ -17,7 +17,7 @@ public class Spawn implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            Location location = this.pluginInstance.getConfig().getLocation("spawn");
+            Location location = (Location) this.pluginInstance.getConfig().get("spawn");
             if (location != null) {
                 player.teleport(location);
                 player.sendMessage("You have been teleported to the spawn point.");

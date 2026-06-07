@@ -31,10 +31,11 @@ public class BackCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can use this command.");
             return true;
         }
+        Player player = (Player) sender;
         if (!settings.isBackEnabled()) {
             manager.sendPrefixed(player, ChatColor.RED + "The /back command is disabled.");
             return true;
@@ -79,9 +80,10 @@ public class BackCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length != 1 || !(sender instanceof Player player)) {
+        if (args.length != 1 || !(sender instanceof Player)) {
             return Collections.emptyList();
         }
+        Player player = (Player) sender;
         // Only suggest players if sender has .others permission
         if (!player.hasPermission("MCT.back.others")) {
             return Collections.emptyList();

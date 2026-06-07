@@ -11,6 +11,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import me.jitish.mCT.MCT;
+import me.jitish.mCT.tools.compatibility.VersionHandler;
+
 /**
  * Handles TPA-related events: death/quit location saving, move-cancel during
  * teleport delay, and optional teleport logging for /back.
@@ -53,7 +56,8 @@ public class TpaListener implements Listener {
         }
 
         // Reset invulnerability in case they quit during invincibility window
-        player.setInvulnerable(false);
+        VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+        if (vh != null) vh.setInvulnerable(player, false);
 
         // Cleanup pending requests (but keep toggles and back locations)
         storage.cleanupPlayer(player.getUniqueId());

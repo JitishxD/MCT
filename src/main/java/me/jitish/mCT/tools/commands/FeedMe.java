@@ -24,7 +24,8 @@ public class FeedMe implements CommandExecutor, TabCompleter {
                 this.feedPlayer(player);
             }
 
-            if (sender instanceof Player p) {
+            if (sender instanceof Player) {
+                Player p = (Player) sender;
                 p.sendMessage(ChatColor.YELLOW + "You maxed all players food level on the server!");
             }
             return true;
@@ -39,7 +40,8 @@ public class FeedMe implements CommandExecutor, TabCompleter {
                     sender.sendMessage(ChatColor.RED + playerName + ChatColor.WHITE + " is not online.");
                 }
             }
-        } else if (sender instanceof Player p) {
+        } else if (sender instanceof Player) {
+            Player p = (Player) sender;
             this.feedPlayer(p);
         } else {
             System.out.println("Something unexpected happened.");
