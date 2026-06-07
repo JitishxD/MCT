@@ -114,6 +114,11 @@ public class LegacyFeaturesHandler implements VersionHandler, Listener {
 
     @Override
     public int getMinHeight(org.bukkit.World world) {
-        return 0;
+        return 0; // Legacy worlds always start at 0
+    }
+
+    @Override
+    public String getLockSymbol() {
+        return "\u2588";
     }
 }

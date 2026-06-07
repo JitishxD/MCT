@@ -1,5 +1,6 @@
 package me.jitish.mCT.warps;
 
+import me.jitish.mCT.MCT;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -163,7 +164,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
         if (warp.isPrivate()) {
             sender.sendMessage(ChatColor.GREEN + "Warp " + ChatColor.AQUA + warp.getName()
-                    + ChatColor.GREEN + " is now " + ChatColor.RED + "\u2588 Private" + ChatColor.GREEN + ".");
+                    + ChatColor.GREEN + " is now " + ChatColor.RED + MCT.getPluginInstanceVar().versionHandler.getLockSymbol() + " Private" + ChatColor.GREEN + ".");
             sender.sendMessage(ChatColor.GRAY + "Use /" + label + " allow " + warp.getName()
                     + " <player> to grant access.");
         } else {
@@ -257,7 +258,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
         }
 
         String status = warp.isPrivate()
-                ? (ChatColor.RED + "\u2588 Private")
+                ? (ChatColor.RED + MCT.getPluginInstanceVar().versionHandler.getLockSymbol() + " Private")
                 : (ChatColor.GREEN + "\u2588 Public");
         sender.sendMessage(ChatColor.GOLD + "Warp " + ChatColor.AQUA + warp.getName()
                 + ChatColor.GOLD + " - " + status);
@@ -368,7 +369,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
             // Name (green for public, gray+lock for private)
             if (warp.isPrivate()) {
-                row.append(ChatColor.GRAY).append("\uD83D\uDD12 ")
+                row.append(ChatColor.GRAY).append(MCT.getPluginInstanceVar().versionHandler.getLockSymbol()).append(" ")
                         .append(ChatColor.ITALIC).append(warp.getName())
                         .append(ChatColor.RESET);
             } else {
@@ -433,7 +434,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
 
         Location location = warp.getLocation();
         String privacyStatus = warp.isPrivate()
-                ? (ChatColor.RED + "\u2588 Private")
+                ? (ChatColor.RED + MCT.getPluginInstanceVar().versionHandler.getLockSymbol() + " Private")
                 : (ChatColor.GREEN + "\u2588 Public");
 
         sender.sendMessage(ChatColor.GOLD + settings.titleSingular + ": " + ChatColor.AQUA + warp.getName());
@@ -472,10 +473,9 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        // Access check — admins bypass private restrictions
         if (warp.isPrivate() && !warp.canAccess(player.getUniqueId())
                 && !player.hasPermission(settings.adminPermission)) {
-            player.sendMessage(ChatColor.RED + "\uD83D\uDD12 That " + settings.warpLabel
+            player.sendMessage(ChatColor.RED + MCT.getPluginInstanceVar().versionHandler.getLockSymbol() + " That " + settings.warpLabel
                     + " is private. You do not have access.");
             return;
         }

@@ -11,4 +11,5 @@ public interface VersionHandler {
     void sendActionBar(Player p, String message);
     int getPlayerPing(Player p);
     int getMinHeight(org.bukkit.World world);
+    String getLockSymbol();
 }

@@ -73,4 +73,9 @@ public class ModernFeaturesHandler implements VersionHandler {
     public int getMinHeight(org.bukkit.World world) {
         return world.getMinHeight();
     }
+
+    @Override
+    public String getLockSymbol() {
+        return "\uD83D\uDD12";
+    }
 }
