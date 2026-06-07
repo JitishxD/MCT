@@ -76,7 +76,7 @@ public class Fly implements CommandExecutor, TabCompleter {
                 this.toggleFlying(p);
             }
         } else {
-            System.out.println("Come to the server bro");
+            sender.sendMessage(ChatColor.RED + "You must specify a player when running from the console.");
         }
         return true;
     }

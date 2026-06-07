@@ -207,16 +207,24 @@ public final class MCT extends JavaPlugin {
     }
 
     private void setupVersionHandler() {
-        String version = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        if (version.startsWith("v1_13") || version.startsWith("v1_14") || version.startsWith("v1_15") ||
-                version.startsWith("v1_16") || version.startsWith("v1_17") || version.startsWith("v1_18") ||
-                version.startsWith("v1_19") || version.startsWith("v1_20") || version.startsWith("v1_21")) {
-            versionHandler = new ModernFeaturesHandler();
-            getLogger().info("Loaded ModernFeaturesHandler for " + version);
+        String[] packageParts = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().split("\\.");
+        if (packageParts.length > 3) {
+            String version = packageParts[3];
+            if (version.startsWith("v1_13") || version.startsWith("v1_14") || version.startsWith("v1_15") ||
+                    version.startsWith("v1_16") || version.startsWith("v1_17") || version.startsWith("v1_18") ||
+                    version.startsWith("v1_19") || version.startsWith("v1_20") || version.startsWith("v1_21")) {
+                versionHandler = new ModernFeaturesHandler();
+                getLogger().info("Loaded ModernFeaturesHandler for " + version);
+            } else {
+                versionHandler = new LegacyFeaturesHandler();
+                getServer().getPluginManager().registerEvents((org.bukkit.event.Listener) versionHandler, this);
+                getLogger().info("Loaded LegacyFeaturesHandler for " + version);
+            }
         } else {
-            versionHandler = new LegacyFeaturesHandler();
-            getServer().getPluginManager().registerEvents((org.bukkit.event.Listener) versionHandler, this);
-            getLogger().info("Loaded LegacyFeaturesHandler for " + version);
+            // Modern Paper (1.20.5+) removed the NMS version string from the package name.
+            // Since this is latest it fully supports the modern API.
+            versionHandler = new ModernFeaturesHandler();
+            getLogger().info("Loaded ModernFeaturesHandler for non-versioned package: " + String.join(".", packageParts));
         }
     }
 }

@@ -23,9 +23,9 @@ public class Die implements CommandExecutor, Listener {
 
 
             } else if (sender instanceof ConsoleCommandSender) {
-                System.out.println("Command was run by a server console.");
+                sender.sendMessage("Command was run by a server console.");
             } else if (sender instanceof BlockCommandSender) {
-                System.out.println("Command was run by a command block.");
+                sender.sendMessage("Command was run by a command block.");
             }
 
             return true;

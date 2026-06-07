@@ -44,7 +44,7 @@ public class FeedMe implements CommandExecutor, TabCompleter {
             Player p = (Player) sender;
             this.feedPlayer(p);
         } else {
-            System.out.println("Something unexpected happened.");
+            sender.sendMessage(ChatColor.RED + "You must specify a player when running from the console.");
         }
 
         return true;

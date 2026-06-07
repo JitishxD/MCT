@@ -76,7 +76,7 @@ public class God implements CommandExecutor, TabCompleter {
                 this.toggleGodMode(p);
             }
         } else {
-            System.out.println("Come to the server bro");
+            sender.sendMessage(ChatColor.RED + "You must specify a player when running from the console.");
         }
         return true;
     }

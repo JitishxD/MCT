@@ -2,6 +2,7 @@ package me.jitish.mCT.tools.spawn;
 
 import me.jitish.mCT.MCT;
 import me.jitish.mCT.tools.LocationUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -32,7 +33,7 @@ public class Spawn implements CommandExecutor {
                 player.sendMessage("There is no spawn point set.");
             }
         } else {
-            System.out.println("Bruh get yo ass on the server.");
+            sender.sendMessage(ChatColor.RED + "Bruh get yo ass on the server.");
         }
 
         return true;

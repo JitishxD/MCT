@@ -51,7 +51,7 @@ public class SetSpawn implements CommandExecutor {
             player.sendMessage("Spawn location set!");
 
         } else {
-            System.out.println("Bruh get yo ass on the server.");
+            sender.sendMessage(ChatColor.RED + "Bruh get yo ass on the server.");
         }
 
 

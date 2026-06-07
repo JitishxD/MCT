@@ -75,7 +75,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
                 this.toggleNightVision(p);
             }
         } else {
-            System.out.println("Come to the server bro");
+            sender.sendMessage(ChatColor.RED + "You must specify a player when running from the console.");
         }
         return true;
     }
