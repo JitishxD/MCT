@@ -79,7 +79,7 @@ public class TpaHereCommand implements CommandExecutor, TabCompleter {
             manager.sendPrefixed(player, ChatColor.RED + "Cross-world teleportation is disabled.");
             return true;
         }
-        if (settings.isGamemodeCheck() && (player.getGameMode() == GameMode.SPECTATOR || target.getGameMode() == GameMode.SPECTATOR)) {
+        if (settings.isGamemodeCheck() && (player.getGameMode().name().equals("SPECTATOR") || target.getGameMode().name().equals("SPECTATOR"))) {
             manager.sendPrefixed(player, ChatColor.RED + "You can't send TPA requests in spectator mode.");
             return true;
         }

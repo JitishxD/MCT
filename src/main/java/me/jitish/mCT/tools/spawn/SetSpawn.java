@@ -1,6 +1,7 @@
 package me.jitish.mCT.tools.spawn;
 
 import me.jitish.mCT.MCT;
+import me.jitish.mCT.tools.LocationUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -39,9 +40,9 @@ public class SetSpawn implements CommandExecutor {
 //            pluginInstance.getConfig().set("spawn.z", location.getZ());
 //            pluginInstance.getConfig().set("spawn.worldName", location.getWorld().getName());
 
-            //A Location is a special type of object that can be saved to a config.yml automatically by bukkit
-            //This is because it implements """""""""ConfigurationSerializable"""""""""
-            pluginInstance.getConfig().set("spawn", location);
+            //set the spawn location in the config.yml
+            org.bukkit.configuration.ConfigurationSection spawnSection = pluginInstance.getConfig().createSection("spawn");
+            LocationUtil.saveLocation(spawnSection, location);
 
             //save the config.yml
             pluginInstance.saveConfig();

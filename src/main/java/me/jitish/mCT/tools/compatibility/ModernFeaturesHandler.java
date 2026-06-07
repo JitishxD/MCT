@@ -44,24 +44,43 @@ public class ModernFeaturesHandler implements VersionHandler {
 
     @Override
     public void sendTpaRequestButtons(Player p, String prefixMessage) {
-        TextComponent acceptBtn = new TextComponent(ChatColor.GREEN + "[Accept] ");
-        acceptBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept"));
-        acceptBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to accept")));
+        try {
+            TextComponent acceptBtn = new TextComponent(ChatColor.GREEN + "[Accept] ");
+            acceptBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept"));
+            try {
+                acceptBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to accept")));
+            } catch (Throwable t) {
+                // Fallback for 1.13-1.15
+                acceptBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.ComponentBuilder("Click to accept").create()));
+            }
 
-        TextComponent denyBtn = new TextComponent(ChatColor.RED + "[Deny]");
-        denyBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny"));
-        denyBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to deny")));
+            TextComponent denyBtn = new TextComponent(ChatColor.RED + "[Deny]");
+            denyBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny"));
+            try {
+                denyBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Click to deny")));
+            } catch (Throwable t) {
+                // Fallback for 1.13-1.15
+                denyBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new net.md_5.bungee.api.chat.ComponentBuilder("Click to deny").create()));
+            }
 
-        TextComponent msg = new TextComponent(prefixMessage);
-        msg.addExtra(acceptBtn);
-        msg.addExtra(denyBtn);
+            TextComponent msg = new TextComponent(prefixMessage);
+            msg.addExtra(acceptBtn);
+            msg.addExtra(denyBtn);
 
-        p.spigot().sendMessage(msg);
+            p.spigot().sendMessage(msg);
+        } catch (Throwable t) {
+            p.sendMessage(prefixMessage);
+            p.sendMessage(ChatColor.GRAY + "Type " + ChatColor.GREEN + "/tpaccept" + ChatColor.GRAY + " or " + ChatColor.RED + "/tpdeny");
+        }
     }
 
     @Override
     public void sendActionBar(Player p, String message) {
-        p.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, new TextComponent(message));
+        try {
+            p.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, new TextComponent(message));
+        } catch (Throwable t) {
+            // Do nothing - Action bars are transient. Falling back to chat causes massive spam in loops (e.g. Ping display).
+        }
     }
 
     @Override

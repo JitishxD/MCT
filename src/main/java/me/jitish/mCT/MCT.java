@@ -19,6 +19,10 @@ import me.jitish.mCT.warps.WarpCommand;
 import me.jitish.mCT.warps.WarpStore;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
 public final class MCT extends JavaPlugin {
 
     private static MCT pluginInstanceVarWithMethod1;
@@ -203,29 +207,16 @@ public final class MCT extends JavaPlugin {
     }
 
     private void setupVersionHandler() {
-        String pkg = getServer().getClass().getPackage().getName();
-        String token = pkg.substring(pkg.lastIndexOf('.') + 1);
-
-        if ("craftbukkit".equalsIgnoreCase(token)) {
-            this.versionHandler = new ModernFeaturesHandler();
-            return;
-        }
-
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile("^v(\\d+)_(\\d+)_R(\\d+)$");
-        java.util.regex.Matcher m = p.matcher(token);
-        if (!m.matches()) {
-            this.versionHandler = new ModernFeaturesHandler();
-            return;
-        }
-
-        int major = Integer.parseInt(m.group(1));
-        int minor = Integer.parseInt(m.group(2));
-
-        if (major == 1 && minor < 13) {
-            this.versionHandler = new LegacyFeaturesHandler();
-            getServer().getPluginManager().registerEvents((org.bukkit.event.Listener) this.versionHandler, this);
+        String version = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+        if (version.startsWith("v1_13") || version.startsWith("v1_14") || version.startsWith("v1_15") ||
+                version.startsWith("v1_16") || version.startsWith("v1_17") || version.startsWith("v1_18") ||
+                version.startsWith("v1_19") || version.startsWith("v1_20") || version.startsWith("v1_21")) {
+            versionHandler = new ModernFeaturesHandler();
+            getLogger().info("Loaded ModernFeaturesHandler for " + version);
         } else {
-            this.versionHandler = new ModernFeaturesHandler();
+            versionHandler = new LegacyFeaturesHandler();
+            getServer().getPluginManager().registerEvents((org.bukkit.event.Listener) versionHandler, this);
+            getLogger().info("Loaded LegacyFeaturesHandler for " + version);
         }
     }
 }

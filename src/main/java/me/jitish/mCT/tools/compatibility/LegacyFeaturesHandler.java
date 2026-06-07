@@ -53,19 +53,25 @@ public class LegacyFeaturesHandler implements VersionHandler, Listener {
 
     @Override
     public void sendTpaRequestButtons(Player p, String prefixMessage) {
-        TextComponent acceptBtn = new TextComponent(ChatColor.GREEN + "[Accept] ");
-        acceptBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept"));
-        acceptBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to accept").create()));
+        try {
+            TextComponent acceptBtn = new TextComponent(ChatColor.GREEN + "[Accept] ");
+            acceptBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept"));
+            acceptBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to accept").create()));
 
-        TextComponent denyBtn = new TextComponent(ChatColor.RED + "[Deny]");
-        denyBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny"));
-        denyBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to deny").create()));
+            TextComponent denyBtn = new TextComponent(ChatColor.RED + "[Deny]");
+            denyBtn.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny"));
+            denyBtn.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to deny").create()));
 
-        TextComponent msg = new TextComponent(prefixMessage);
-        msg.addExtra(acceptBtn);
-        msg.addExtra(denyBtn);
+            TextComponent msg = new TextComponent(prefixMessage);
+            msg.addExtra(acceptBtn);
+            msg.addExtra(denyBtn);
 
-        p.spigot().sendMessage(msg);
+            p.spigot().sendMessage(msg);
+        } catch (Throwable t) {
+            // Fallback for servers without Spigot Chat API (e.g., standard CraftBukkit 1.7)
+            p.sendMessage(prefixMessage);
+            p.sendMessage(ChatColor.GRAY + "Type " + ChatColor.GREEN + "/tpaccept" + ChatColor.GRAY + " or " + ChatColor.RED + "/tpdeny");
+        }
     }
 
     @Override
@@ -84,7 +90,7 @@ public class LegacyFeaturesHandler implements VersionHandler, Listener {
             
             playerConnection.getClass().getMethod("sendPacket", Class.forName("net.minecraft.server." + version + ".Packet")).invoke(playerConnection, packet);
         } catch (Exception e) {
-            // Do nothing
+            // Do nothing - Action bars are transient. Falling back to chat causes massive spam in loops (e.g. Ping display).
         }
     }
 

@@ -1,6 +1,7 @@
 package me.jitish.mCT.warps;
 
 import me.jitish.mCT.MCT;
+import me.jitish.mCT.tools.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -46,7 +47,12 @@ public class WarpStore {
 
             String name = warpSection.getString("name", key);
             String ownerIdText = warpSection.getString("owner-id");
-            Location location = (Location) warpSection.get("location");
+            Location location = null;
+            if (warpSection.isConfigurationSection("location")) {
+                location = LocationUtil.loadLocation(warpSection.getConfigurationSection("location"));
+            } else if (warpSection.get("location") instanceof Location) {
+                location = (Location) warpSection.get("location");
+            }
             if (ownerIdText == null || location == null || location.getWorld() == null) {
                 plugin.getLogger().warning("Skipping invalid " + label + ": " + key);
                 continue;
@@ -86,7 +92,8 @@ public class WarpStore {
             warpSection.set("name", warp.getName());
             warpSection.set("owner-id", warp.getOwnerId().toString());
             warpSection.set("owner-name", warp.getOwnerName());
-            warpSection.set("location", warp.getLocation());
+            ConfigurationSection locSection = warpSection.createSection("location");
+            LocationUtil.saveLocation(locSection, warp.getLocation());
             warpSection.set("visits", warp.getVisits());
             warpSection.set("created-at", warp.getCreatedAt());
             warpSection.set("private", warp.isPrivate());
