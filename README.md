@@ -235,10 +235,11 @@ MCT/
 │   │   │   │   ├── VersionHandler.java       # Interface for modern features
 │   │   │   │   ├── ModernFeaturesHandler.java # 1.13+ implementation
 │   │   │   │   └── LegacyFeaturesHandler.java # 1.12- implementation
-│   │   │   └── spawn/                        # Spawn system
-│   │   │       ├── SetSpawn.java             # /setspawn command
-│   │   │       ├── Spawn.java                # /spawn command
-│   │   │       └── SpawnEvents.java          # Spawn/respawn handling
+│   │   │   ├── spawn/                        # Spawn system
+│   │   │   │   ├── SetSpawn.java             # /setspawn command
+│   │   │   │   ├── Spawn.java                # /spawn command
+│   │   │   │   └── SpawnEvents.java          # Spawn/respawn handling
+│   │   │   └── LocationUtil.java             # Cross-version primitive location serializer
 │   │   ├── tpa/                              # TPA teleport system
 │   │   │   ├── TpaManager.java               # Core TPA logic (requests, teleport, safe-TP)
 │   │   │   ├── TpaStorage.java               # In-memory state (requests, cooldowns, toggles)
@@ -296,10 +297,12 @@ MCT is designed to run seamlessly on virtually any Spigot version from **1.7 to 
 1. **Base API Downgrade:** The plugin is compiled against Java 8 and the Spigot 1.13 API. This serves as a "middle-ground" that prevents `UnsupportedClassVersionError` on older servers while maintaining access to most modern Bukkit methods.
 2. **Dynamic Version Detection:** On startup, the plugin parses the server's version string (e.g., `v1_8_R3`, `v1_21_R1`).
 3. **The `VersionHandler` Interface:** Modern features that don't exist in older versions (like clickable TextComponents, action bar messages, or specific sound enums) are abstracted behind a `VersionHandler` interface.
-4. **Fallback Implementations:** 
-   - If the server is 1.13+, it loads `ModernFeaturesHandler` which utilizes the modern API natively.
-   - If the server is older (e.g., 1.8.8), it loads `LegacyFeaturesHandler` or gracefully catches missing methods (`NoSuchMethodError`) and falls back to traditional alternatives (e.g., sending standard chat messages instead of clickable text).
-5. **Reflection:** For deeply ingrained breaking changes (like `ItemMeta.Damageable` in 1.13+ vs `item.setDurability()` in 1.8), MCT heavily utilizes Java Reflection to determine available methods at runtime and cast appropriately, ensuring the exact same code executes correctly regardless of the underlying server software.
+4. **Pure Bukkit Fallbacks:** 
+   - If the server is 1.13+, it loads `ModernFeaturesHandler`. If older (e.g., 1.8.8), it loads `LegacyFeaturesHandler`.
+   - Both handlers actively `try/catch` BungeeCord/Spigot chat events. If the server is pure CraftBukkit (lacking `.spigot()` API), UI features like clickable TPA buttons gracefully degrade into standard chat messages to prevent crashes.
+   - Transient features unsupported by legacy versions (e.g., continuous Ping Action Bars on 1.7.10) fail silently instead of spamming chat.
+5. **Primitive Serialization:** To prevent fatal `ConstructorException` crashes from Bukkit's natively flawed `!!org.bukkit.Location` SnakeYAML serialization across drastically different server versions, all locations (warps, spawns) are mathematically saved as primitive maps (`x`, `y`, `z`, `yaw`, `pitch`, `world`).
+6. **Reflection:** For deeply ingrained breaking changes (like `ItemMeta.Damageable` in 1.13+ vs `item.setDurability()` in 1.8), MCT heavily utilizes Java Reflection to determine available methods at runtime and cast appropriately, ensuring the exact same code executes correctly regardless of the underlying server software.
 
 ---
 
