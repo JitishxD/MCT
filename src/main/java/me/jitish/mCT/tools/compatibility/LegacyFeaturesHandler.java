@@ -68,7 +68,7 @@ public class LegacyFeaturesHandler implements VersionHandler, Listener {
 
             p.spigot().sendMessage(msg);
         } catch (Throwable t) {
-            // Fallback for servers without Spigot Chat API (e.g., standard CraftBukkit 1.7)
+            // Fallback for servers without Spigot Chat API (e.g., standard CraftBukkit 1.8)
             p.sendMessage(prefixMessage);
             p.sendMessage(ChatColor.GRAY + "Type " + ChatColor.GREEN + "/tpaccept" + ChatColor.GRAY + " or " + ChatColor.RED + "/tpdeny");
         }

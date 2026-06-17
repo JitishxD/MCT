@@ -19,7 +19,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
             p.removePotionEffect(PotionEffectType.NIGHT_VISION);
             p.sendMessage(ChatColor.RED + "Night vision disabled.");
         } else {
-            p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false));
             p.sendMessage(ChatColor.GREEN + "Night vision enabled.");
         }
     }
@@ -30,7 +30,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
             target.sendMessage(ChatColor.RED + "Night vision disabled.");
             sender.sendMessage("You have disabled night vision for " + ChatColor.RED + target.getDisplayName());
         } else {
-            target.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+            target.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false));
             target.sendMessage(ChatColor.GREEN + "Night vision enabled.");
             sender.sendMessage("You have enabled night vision for " + ChatColor.GREEN + target.getDisplayName());
         }
@@ -49,7 +49,7 @@ public class NightVision implements CommandExecutor, TabCompleter {
             } else if (args.length == 2 && args[0].equalsIgnoreCase("all")) {
                 if (args[1].equalsIgnoreCase("on")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false));
                         player.sendMessage(ChatColor.GREEN + "nightvision enabled!");
                     }
                     p.sendMessage(ChatColor.GREEN + "You turned on nightvision for all players on the server!");

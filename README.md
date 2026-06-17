@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Minecraft-1.7--Latest-62B47A?style=for-the-badge&logo=minecraft&logoColor=white" alt="Minecraft Version"/>
+  <img src="https://img.shields.io/badge/Minecraft-1.8.8--Latest-62B47A?style=for-the-badge&logo=minecraft&logoColor=white" alt="Minecraft Version"/>
   <img src="https://img.shields.io/badge/Spigot_API-1.13-F7931A?style=for-the-badge&logo=spigotmc&logoColor=white" alt="Spigot API"/>
   <img src="https://img.shields.io/badge/Java-8-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java Version"/>
   <img src="https://img.shields.io/badge/Gradle-9.5.1-02303A?style=for-the-badge&logo=gradle&logoColor=white" alt="Gradle Version"/>
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="Plugin Version"/>
+  <img src="https://img.shields.io/badge/version-1.2.0-blue?style=flat-square" alt="Plugin Version"/>
   <img src="https://img.shields.io/badge/license-All_Rights_Reserved-red?style=flat-square" alt="License"/>
   <img src="https://img.shields.io/badge/status-Active-brightgreen?style=flat-square" alt="Status"/>
   <img src="https://img.shields.io/badge/author-Jitish-purple?style=flat-square" alt="Author"/>
@@ -222,6 +222,7 @@ MCT/
 │   │   │   │   ├── Ping.java                 # /ping command
 │   │   │   │   ├── Repair.java               # /repair command
 │   │   │   │   ├── Enchantt.java             # /enchantt command
+│   │   │   │   ├── EnchantHelper.java         # Enchantment utilities & reflection
 │   │   │   │   ├── Denchant.java             # /denchant command
 │   │   │   │   ├── Summonn.java              # /summonn command
 │   │   │   │   ├── SummonnVariants.java       # Entity variant registry
@@ -234,7 +235,7 @@ MCT/
 │   │   │   ├── compatibility/                # Cross-version handlers
 │   │   │   │   ├── VersionHandler.java       # Interface for modern features
 │   │   │   │   ├── ModernFeaturesHandler.java # 1.13+ implementation
-│   │   │   │   └── LegacyFeaturesHandler.java # 1.12- implementation
+│   │   │   │   └── LegacyFeaturesHandler.java # 1.8-1.12 implementation
 │   │   │   ├── spawn/                        # Spawn system
 │   │   │   │   ├── SetSpawn.java             # /setspawn command
 │   │   │   │   ├── Spawn.java                # /spawn command
@@ -286,13 +287,13 @@ MCT/
 | Minecraft Version | Supported | Notes |
 |:-------------------|:---------:|:------|
 | 1.13 - Latest | ✅ | Full feature support (Particles, clickable chat, sounds, etc) |
-| 1.7 - 1.12 | ✅ | Core functionality works. Modern features fail gracefully via VersionHandler |
+| 1.8.8 - 1.12 | ✅ | Core functionality works. Modern features fail gracefully via VersionHandler |
 
 ---
 
 ## ⚙️ Version Handling Architecture
 
-MCT is designed to run seamlessly on virtually any Spigot version from **1.7 to the latest release** without requiring multiple different jars. This is achieved through a smart, reflection-based multi-version strategy:
+MCT is designed to run seamlessly on virtually any Spigot version from **1.8.8 to the latest release** without requiring multiple different jars. This is achieved through a smart, reflection-based multi-version strategy:
 
 1. **Base API Downgrade:** The plugin is compiled against Java 8 and the Spigot 1.13 API. This serves as a "middle-ground" that prevents `UnsupportedClassVersionError` on older servers while maintaining access to most modern Bukkit methods.
 2. **Dynamic Version Detection:** On startup, the plugin parses the server's version string (e.g., `v1_8_R3`, `v1_21_R1`).
@@ -300,7 +301,8 @@ MCT is designed to run seamlessly on virtually any Spigot version from **1.7 to 
 4. **Pure Bukkit Fallbacks:** 
    - If the server is 1.13+, it loads `ModernFeaturesHandler`. If older (e.g., 1.8.8), it loads `LegacyFeaturesHandler`.
    - Both handlers actively `try/catch` BungeeCord/Spigot chat events. If the server is pure CraftBukkit (lacking `.spigot()` API), UI features like clickable TPA buttons gracefully degrade into standard chat messages to prevent crashes.
-   - Transient features unsupported by legacy versions (e.g., continuous Ping Action Bars on 1.7.10) fail silently instead of spamming chat.
+   - Transient features unsupported by legacy versions (e.g., continuous Ping Action Bars on 1.8-1.12) fail silently instead of spamming chat.
+   - The plugin explicitly rejects Minecraft 1.7 and older on startup, as those versions lack critical APIs (ArmorStands, GameMode.SPECTATOR, etc.).
 5. **Primitive Serialization:** To prevent fatal `ConstructorException` crashes from Bukkit's natively flawed `!!org.bukkit.Location` SnakeYAML serialization across drastically different server versions, all locations (warps, spawns) are mathematically saved as primitive maps (`x`, `y`, `z`, `yaw`, `pitch`, `world`).
 6. **Reflection:** For deeply ingrained breaking changes (like `ItemMeta.Damageable` in 1.13+ vs `item.setDurability()` in 1.8), MCT heavily utilizes Java Reflection to determine available methods at runtime and cast appropriately, ensuring the exact same code executes correctly regardless of the underlying server software.
 
@@ -310,7 +312,8 @@ MCT is designed to run seamlessly on virtually any Spigot version from **1.7 to 
 
 | Version | MC Version | Highlights                                                                                                  |
 |:--------|:-----------|:------------------------------------------------------------------------------------------------------------|
-| `1.1.0` | 1.7-Latest | Downgraded to Java 8, added `VersionHandler` to gracefully support Minecraft 1.7 through the latest release, improved `/tpauto`, fixed enchant autocomplete, and patched 1.8.8 bugs (AFK holograms, Sounds) |
+| `1.2.0` | 1.8.8-Latest | Dropped 1.7 support (minimum is now 1.8.8), added startup version gate, routed TPA sounds through VersionHandler, fixed modern Paper startup crash, removed `System.out` console warnings |
+| `1.1.0` | 1.8.8-Latest | Downgraded to Java 8, added `VersionHandler` to gracefully support Minecraft 1.8.8 through the latest release, improved `/tpauto`, fixed enchant autocomplete, and patched 1.8.8 bugs (AFK holograms, Sounds) |
 | `1.0.0-26.1` | 26.1       | Release V1! restructured into feature-based packages (tools/, tpa/, warps/)                                 |
 | `0.0.9-26.1.2` | 26.1.2     | Integrated SimpleTpa: /tpa, /tpahere, /tpaccept, /tpdeny, /tpcancel, /back, /tpatoggle, /tpaignore, /tpauto, /tpahereall with full config |
 | `0.0.8-26.1.2` | 26.1.2     | Private warps with per-player access control; compact inline warp list; player name filter for list command |

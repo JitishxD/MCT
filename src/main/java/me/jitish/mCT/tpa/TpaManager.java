@@ -1,9 +1,7 @@
 package me.jitish.mCT.tpa;
 
-// Modern chat imports removed for 1.7 compatibility
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -13,7 +11,6 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import me.jitish.mCT.MCT;
 import me.jitish.mCT.tools.compatibility.VersionHandler;
@@ -207,10 +204,7 @@ public class TpaManager {
 
         // Play sound
         if (settings.isSoundsEnabled()) {
-            VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
-            if (vh != null) {
-                vh.sendSound(receiver, settings.getSound(), settings.getSoundVolume(), settings.getSoundPitch());
-            }
+            playConfiguredSound(receiver);
         }
 
         sendPrefixed(receiver, receivedMsg);
@@ -463,8 +457,7 @@ public class TpaManager {
 
         // Play sound
         if (settings.isSoundsEnabled()) {
-            teleporting.playSound(teleporting.getLocation(), settings.getSound(),
-                    settings.getSoundVolume(), settings.getSoundPitch());
+            playConfiguredSound(teleporting);
         }
 
         // Set invincibility
@@ -488,6 +481,13 @@ public class TpaManager {
         VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
         if (vh != null) {
             vh.spawnParticle(player, settings.getParticle());
+        }
+    }
+
+    private void playConfiguredSound(Player player) {
+        VersionHandler vh = MCT.getPluginInstanceVar().versionHandler;
+        if (vh != null) {
+            vh.sendSound(player, settings.getSound(), settings.getSoundVolume(), settings.getSoundPitch());
         }
     }
 
@@ -542,8 +542,7 @@ public class TpaManager {
                     spawnParticles(player);
                 }
                 if (settings.isSoundsEnabled()) {
-                    player.playSound(player.getLocation(), settings.getSound(),
-                            settings.getSoundVolume(), settings.getSoundPitch());
+                    playConfiguredSound(player);
                 }
                 sendPrefixed(player, ChatColor.GREEN + "Teleported to your previous location.");
             }

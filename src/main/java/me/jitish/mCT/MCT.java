@@ -42,7 +42,10 @@ public final class MCT extends JavaPlugin {
 
         pluginInstanceVarWithMethod1 = this;
 
-        setupVersionHandler();
+        if (!setupVersionHandler()) {
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         //Configuration file setup (config.yml)
         getConfig().options().copyDefaults(); // todo this line of code is suspicious
@@ -206,13 +209,17 @@ public final class MCT extends JavaPlugin {
         }
     }
 
-    private void setupVersionHandler() {
+    private boolean setupVersionHandler() {
         String[] packageParts = org.bukkit.Bukkit.getServer().getClass().getPackage().getName().split("\\.");
         if (packageParts.length > 3) {
             String version = packageParts[3];
-            if (version.startsWith("v1_13") || version.startsWith("v1_14") || version.startsWith("v1_15") ||
-                    version.startsWith("v1_16") || version.startsWith("v1_17") || version.startsWith("v1_18") ||
-                    version.startsWith("v1_19") || version.startsWith("v1_20") || version.startsWith("v1_21")) {
+            int minorVersion = parseMinorVersion(version);
+            if (minorVersion > 0 && minorVersion < 8) {
+                getLogger().severe("Unsupported Minecraft server version: " + version + ". MCT requires Minecraft 1.8.8 or newer.");
+                return false;
+            }
+
+            if (minorVersion >= 13 || minorVersion == -1) {
                 versionHandler = new ModernFeaturesHandler();
                 getLogger().info("Loaded ModernFeaturesHandler for " + version);
             } else {
@@ -225,6 +232,22 @@ public final class MCT extends JavaPlugin {
             // Since this is latest it fully supports the modern API.
             versionHandler = new ModernFeaturesHandler();
             getLogger().info("Loaded ModernFeaturesHandler for non-versioned package: " + String.join(".", packageParts));
+        }
+        return true;
+    }
+
+    private int parseMinorVersion(String version) {
+        if (version == null || !version.startsWith("v1_")) {
+            return -1;
+        }
+
+        String remainder = version.substring(3);
+        int separator = remainder.indexOf('_');
+        String minor = separator >= 0 ? remainder.substring(0, separator) : remainder;
+        try {
+            return Integer.parseInt(minor);
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 }
